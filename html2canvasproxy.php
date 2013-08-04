@@ -1,6 +1,6 @@
 <?php
 /*
-  html2canvas-proxy-php 0.0.1
+  html2canvas-php-proxy 0.0.1
   Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
   Released under the MIT license
