@@ -1,6 +1,8 @@
 <?php
+print_r($_SERVER);
+exit;
 /*
-  html2canvas-php-proxy 0.0.1
+  html2canvas-proxy-php 0.0.1
   Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
   Released under the MIT license
@@ -28,7 +30,7 @@ header('Access-Control-Allow-Headers: *');
 header('Content-Type: application/javascript');
 
 if(isset($_GET['url']{0}, $_GET['callback']{0})){
-  $uri = parse_url($_GET['url']);
+	$uri = parse_url($_GET['url']);
 	$secure = strcasecmp($uri['scheme'],'https')===0;
 	if(!in_array($uri['scheme'], Array('http','https'))){
 		$err = 'the '.$uri['scheme'].' scheme is invalid';
@@ -44,7 +46,7 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 		$err = '';
 
 		if(!$exist){
-			$exist = mkdir(PATH,755);
+			$exist = mkdir(PATH, 755);
 		}
 		if($exist){
 			$locationFile = PATH . '/' . sha1($_GET['url']);
@@ -74,11 +76,13 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 					) . ' HTTP/1.1' . EOL
 				);
 
-				fwrite($fp,'Accept: */*;q=0.8' . EOL);
-				fwrite($fp,'Host: ' . $uri['host'] . EOL);
+				if(isset($_SERVER['HTTP_ACCEPT']{0})){
+					fwrite($fp,'Accept: ' . $_SERVER['HTTP_ACCEPT'] . EOL);
+				}
 				if(isset($_SERVER['HTTP_USER_AGENT']{0})){
 					fwrite($fp,'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . EOL);
 				}
+				fwrite($fp,'Host: ' . $uri['host'] . EOL);
 				fwrite($fp,'Connection: close' . EOL);
 				fwrite($fp, EOL);
 
@@ -133,7 +137,7 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 						json_encode(
 							($_SERVER['SERVER_PORT']==443 ? 'https':'http://').
 							$_SERVER['HTTP_HOST'].
-							($_SERVER['SERVER_PORT']==80 ? '':(':'.$_SERVER['SERVER_PORT'])).
+							($_SERVER['SERVER_PORT']==80 || $_SERVER['SERVER_PORT']==443 ? '':(':'.$_SERVER['SERVER_PORT'])).
 							dirname($_SERVER['SCRIPT_NAME']).'/'.
 							$locationFile
 						),
