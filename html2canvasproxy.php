@@ -1,6 +1,4 @@
 <?php
-print_r($_SERVER);
-exit;
 /*
   html2canvas-proxy-php 0.0.1
   Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
