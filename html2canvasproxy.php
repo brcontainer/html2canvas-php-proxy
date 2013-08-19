@@ -6,7 +6,7 @@
   Released under the MIT license
 */
 
-error_reporting(0);//disable errors eg: erro connection
+error_reporting(E_ALL|E_STRICT);//disable errors eg: erro connection
 
 define('EOL',chr(10));
 define('WEOL',chr(13));
@@ -92,8 +92,8 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 						continue;
 					}
 					if($isBody===false){
-						if(preg_match('#^(GET|HEAD|POST|PUT|DELETE|TRACE|OPTIONS|CONNECT|PATCH) #',$data) && preg_match('# HTTP\/1[.]\d$#',$data)){
-							$tmp = preg_replace('#(HTTP\/1[.]\d |[^0-9])#i','',$data);
+						if(stripos($data,'HTTP/1.')===0){
+							$tmp = preg_replace('#(HTTP/1[.]\d |[^0-9])#i','',$data);
 							$err = stripos($tmp,'20')!==false ? '' : ('Request error '.$tmp.': '.$_GET['url']);
 							if($err!==''){ break; }
 						} else if(stripos($data,'content-type:')===0){
