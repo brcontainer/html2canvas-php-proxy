@@ -92,14 +92,14 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 						continue;
 					}
 					if($isBody===false){
-						if(stripos($data,'HTTP/1.')===0){
-							$tmp = preg_replace('#(HTTP/1[.]\d |[^0-9])#i','',$data);
+						if(preg_match('#^(GET|HEAD|POST|PUT|DELETE|TRACE|OPTIONS|CONNECT|PATCH) #',$data) && preg_match('# HTTP\/1[.]\d$#',$data)){
+							$tmp = preg_replace('#(HTTP\/1[.]\d |[^0-9])#i','',$data);
 							$err = stripos($tmp,'20')!==false ? '' : ('Request error '.$tmp.': '.$_GET['url']);
 							if($err!==''){ break; }
 						} else if(stripos($data,'content-type:')===0){
 							$tmp = trim(str_replace(Array('content-type:','x-'),'',strtolower($data)));
 							if(!in_array($tmp, $allowMimes)){
-								echo $err = $tmp.' mime is invalid';
+								$err = $tmp.' mime is invalid';
 								break;
 							}
 						}
