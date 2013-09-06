@@ -1,6 +1,6 @@
 <?php
 /*
-  html2canvas-proxy-php 0.0.1
+  html2canvas-proxy-php 0.0.2
   Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
   Released under the MIT license
@@ -38,6 +38,7 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 		$saveFile = false;
 		$exist = is_dir(PATH);
 		$locationFile = '';
+		$token = '';
 		
 		$errno = 0;
 		$errstr = '';
@@ -47,8 +48,9 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 			$exist = mkdir(PATH, 755);
 		}
 		if($exist){
+			$token = mt_rand(0,1000).'_'.(isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : time());
 			$locationFile = PATH . '/' . sha1($_GET['url']);
-			$sf = fopen($locationFile,'w');
+			$sf = fopen($locationFile.'.'.$token,'w');
 		}
 
 		if($exist && $sf){
@@ -85,7 +87,10 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 				fwrite($fp, EOL);
 
 				$isBody = false;
-				$allowMimes = Array('image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'text/html', 'application/xhtml');
+				$allowMimes = Array(
+					'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+					'text/html', 'application/xhtml', 'application/xhtml+xml'
+				);
 
 				while(!feof($fp)){
 					if(($data = fgets($fp))===false){
@@ -97,9 +102,13 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 							$err = stripos($tmp,'20')!==false ? '' : ('Request error '.$tmp.': '.$_GET['url']);
 							if($err!==''){ break; }
 						} else if(stripos($data,'content-type:')===0){
-							$tmp = trim(str_replace(Array('content-type:','x-'),'',strtolower($data)));
-							if(!in_array($tmp, $allowMimes)){
-								$err = $tmp.' mime is invalid';
+							$mime = trim(
+								str_replace('content-type:','',
+									str_replace('/x-','/',strtolower($data))
+								)
+							);
+							if(!in_array($mime, $allowMimes)){
+								$err = $mime.' mime is invalid';
 								break;
 							}
 						}
@@ -113,39 +122,55 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 						fwrite($sf,$data);
 					}
 				}
+				$data = '';
 
 				fclose($sf);
-				$data = '';
 				fclose($fp);
 
+				if($mime===false){
+					$err = 'Server did not return the mimetype';
+				}
+
+				clearstatcache();
 				$source = file_exists($locationFile);
-				$size = filesize($locationFile)>0;
+				if($err!==''){
+					if($source){
+						unlink($locationFile);
+					}
+				} else {
+					$size = filesize($locationFile)>0;
 
-				if($source && $size && $err===''){
-					$cache = CCACHE-1;
+					if($source && $size){
+						$cache = CCACHE-1;
 
-					//set cache
-					header('Last-Modified: ' . GMDATECACHE . ' GMT');
-					header('ETag: ' . md5(GMDATECACHE . ' GMT'));
-					header('Cache-Control: max-age=' . $cache . ', must-revalidate');
-					header('Pragma: max-age=' . $cache);
-					header('Expires: ' . gmdate('D, d M Y H:i:s', $_SERVER['REQUEST_TIME'] + $cache));
+						$mime = str_replace(Array('image/','text/','application/'),'',$mime);
+						if(!rename($locationFile.'.'.$token, $locationFile.'.'.$mime)){
+							$err='File no data';
+						} else {
+							//set cache
+							header('Last-Modified: ' . GMDATECACHE . ' GMT');
+							header('ETag: ' . md5(GMDATECACHE . ' GMT'));
+							header('Cache-Control: max-age=' . $cache . ', must-revalidate');
+							header('Pragma: max-age=' . $cache);
+							header('Expires: ' . gmdate('D, d M Y H:i:s', $_SERVER['REQUEST_TIME'] + $cache));
 
-					echo $_GET['callback'],'(',
-						json_encode(
-							($_SERVER['SERVER_PORT']==443 ? 'https':'http://').
-							$_SERVER['HTTP_HOST'].
-							($_SERVER['SERVER_PORT']==80 || $_SERVER['SERVER_PORT']==443 ? '':(':'.$_SERVER['SERVER_PORT'])).
-							dirname($_SERVER['SCRIPT_NAME']).'/'.
-							$locationFile
-						),
-					')';
-					exit;
-				} else if($err===''){
-					if($size===false){
-						$err='File no data';
-					} else if($source===false){
-						$err='no such file';
+							echo $_GET['callback'],'(',
+								json_encode(
+									($_SERVER['SERVER_PORT']==443 ? 'https':'http://').
+									$_SERVER['HTTP_HOST'].
+									($_SERVER['SERVER_PORT']==80 || $_SERVER['SERVER_PORT']==443 ? '':(':'.$_SERVER['SERVER_PORT'])).
+									dirname($_SERVER['SCRIPT_NAME']).'/'.
+									$locationFile.'.'.$mime
+								),
+							')';
+							exit;
+						}
+					} else if($err===''){
+						if($size===false){
+							$err='File no data';
+						} else if($source===false){
+							$err='no such file';
+						}
 					}
 				}
 			} else {
