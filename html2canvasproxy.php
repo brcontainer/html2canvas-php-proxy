@@ -6,7 +6,7 @@
   Released under the MIT license
 */
 
-error_reporting(E_ALL|E_STRICT);//disable errors eg: erro connection
+error_reporting(E_ALL|E_STRICT);//disable/enable errors eg: error connection
 
 define('EOL',chr(10));
 define('WEOL',chr(13));
