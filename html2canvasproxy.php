@@ -1,6 +1,6 @@
 <?php
 /*
-  html2canvas-proxy-php 0.0.3
+  html2canvas-proxy-php 0.0.4
   Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
   Released under the MIT license
@@ -132,13 +132,13 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 				}
 
 				clearstatcache();
-				$source = file_exists($locationFile);
+				$source = file_exists($locationFile.'.'.$token);
 				if($err!==''){
 					if($source){
-						unlink($locationFile);
+						unlink($locationFile.'.'.$token);
 					}
 				} else {
-					$size = filesize($locationFile)>0;
+					$size = filesize($locationFile.'.'.$token)>0;
 
 					if($source && $size){
 						$cache = CCACHE-1;
