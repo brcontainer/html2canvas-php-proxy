@@ -19,7 +19,7 @@ define('TIMEOUT',30);//Timeout from load SERVER
 
 //set access-control
 header('Access-Control-Max-Age:' . CCACHE);
-header("Access-Control-Allow-Origin: *");
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Request-Method: *');
 header('Access-Control-Allow-Methods: OPTIONS, GET');
 header('Access-Control-Allow-Headers: *');
