@@ -158,7 +158,7 @@ if(isset($_GET['url']{0}, $_GET['callback']{0})){
 
 							echo $_GET['callback'],'(',
 								json_encode(
-									($_SERVER['SERVER_PORT']==443 ? 'https':'http://').
+									($_SERVER['SERVER_PORT']==443 ? 'https://':'http://').
 									$_SERVER['HTTP_HOST'].
 									($_SERVER['SERVER_PORT']==80 || $_SERVER['SERVER_PORT']==443 ? '':(':'.$_SERVER['SERVER_PORT'])).
 									dirname($_SERVER['SCRIPT_NAME']).'/'.
