@@ -261,6 +261,10 @@ if(is_array($response) && isset($response['mime']{0})){
 		);
 
 		$locationFile = preg_replace('#[.][0-9_]+$#', '.' . $response['mime'], $tmp['location']);
+		if(file_exists($locationFile)){
+			unlink($locationFile);
+		}
+
 		if(rename($tmp['location'], $locationFile)){
 			//success
 			$tmp = $response = null;
@@ -280,6 +284,8 @@ if(is_array($response) && isset($response['mime']{0})){
 				),
 			');';
 			exit;
+		} else {
+			$response = 'Failed to rename the temporary file';
 		}
 	}
 }
