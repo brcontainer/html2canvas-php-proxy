@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.0.4
+html2canvas-php-proxy 0.1.0
 =====================
 
 #### PHP Proxy html2canvas ( php 5.0+ ) ####
@@ -42,3 +42,22 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 	</body>
 </html>
 ```
+
+### Changelog ###
+
+#### html2canvas-php-proxy 0.1.0 24.11.2013 ####
+
+* Script completely rewritten
+* Added detection list "Content-length:"
+* Added alternative to callback parameter
+* Added support for detecting max_execution_time
+* Added support for "Location:"
+* Added detect whether there was "Location:" if the response type 3xx chance the header does not exist, returns error
+* Improved response headers from proxy
+* Improved validation http/https
+* In addition to other improvements when the script was rewritten
+
+#### html2canvas-php-proxy 0.0.4 20.11.2013 ####
+
+* Fixed tmp fileName $locationFile.$token
+* Use complete URI scheme for https
