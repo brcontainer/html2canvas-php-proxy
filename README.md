@@ -58,6 +58,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 * Added detect whether there was "Location:" if the response type 3xx chance the header does not exist, returns error
 * Improved response headers from proxy
 * Improved validation http/https
+* Prevent waring in `rename()` (PHP 5.2 in CGI), because the waring `return false;`
 * In addition to other improvements when the script was rewritten
 
 #### html2canvas-php-proxy 0.0.4 20.11.2013 ####
