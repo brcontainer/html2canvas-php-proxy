@@ -24,20 +24,23 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 		<title>html2canvas php proxy</title>
 		<script src="html2canvas.js"></script>
 		<script>
-		window.onload = function(){
-		  html2canvas( [ document.body ], {
-				"proxy":"html2canvasproxy.php",
-				"onrendered": function(canvas) {
-					var uridata = canvas.toDataURL("image/png");
-					window.open(uridata);
-				}
-			});
-		};
+			window.onload = function(){
+				html2canvas( [ document.body ], {
+					"proxy":"html2canvasproxy.php",
+					"onrendered": function(canvas) {
+						var uridata = canvas.toDataURL("image/png");
+						window.open(uridata);
+					}
+				});
+			};
 		</script>
 	</head>
 	<body>
 		<p>
-			<img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&size=400x400&maptype=roadmap&sensor=false">
+			<img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;zoom=12&amp;size=800x600&amp;maptype=roadmap&amp;sensor=false">
+		</p>
+		<p>
+			<img alt="facebook image redirect" src="https://graph.facebook.com/1415773021975267/picture">
 		</p>
 	</body>
 </html>
