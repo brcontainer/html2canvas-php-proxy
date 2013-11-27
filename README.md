@@ -48,7 +48,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 ### Changelog ###
 
-#### html2canvas-php-proxy 0.1.0 24.11.2013 ####
+#### html2canvas-php-proxy 0.1.0 - 24.11.2013 ####
 
 * Script completely rewritten
 * Added detection list "Content-length:" header
@@ -65,7 +65,19 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 * Prevent waring in `rename()` (PHP 5.2 in CGI), because the waring `return false;`
 * In addition to other improvements when the script was rewritten
 
-#### html2canvas-php-proxy 0.0.4 20.11.2013 ####
+#### html2canvas-php-proxy 0.0.4 - 20.11.2013 ####
 
 * Fixed tmp fileName $locationFile.$token
 * Use complete URI scheme for https
+
+
+### Next version ###
+
+Details of future versions are being studied, in other words, can happen as can be forsaken ideas.
+The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on issues from github.
+
+* `MAX_EXEC` may not be less than 15 seconds, if less than 15 will show an error message
+* Replace relative path by absolute path (image folder)
+* Add .jpe, .jif, .jfif, .jfi extensions
+* Add .bmp extension
+* Add .mng, .apng extensions
