@@ -15,9 +15,9 @@ define('GMDATECACHE', gmdate('D, d M Y H:i:s'));
 
 //setup
 define('JSLOG', 'console.log'); //Configure alternative function log, eg. console.log, alert, custom_function
-define('PATH', 'images');//relative path
-define('CCACHE', 60 * 5 * 1000);//Limit access-control and cache, define 0/false/null/-1 to not use cache
-define('TIMEOUT', 30);//Timeout from load SERVER
+define('PATH', 'images');//relative folder where the images are saved
+define('CCACHE', 60 * 5 * 1000);//Limit access-control and cache, define 0/false/null/-1 to not use "http heade cache"
+define('TIMEOUT', 30);//Timeout from load Socket
 
 /*
 If execution has reached the time limit prevents page goes blank (off errors)
