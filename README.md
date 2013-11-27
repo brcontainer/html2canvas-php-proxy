@@ -51,13 +51,17 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 #### html2canvas-php-proxy 0.1.0 24.11.2013 ####
 
 * Script completely rewritten
-* Added detection list "Content-length:"
-* Added alternative to callback parameter
+* Added detection list "Content-length:" header
+* Added alternative to callback parameter (eg. The function call is `console.log` or `alert()`, if there is no callback parameter)
 * Added support for detecting max_execution_time
-* Added support for "Location:"
-* Added detect whether there was "Location:" if the response type 3xx chance the header does not exist, returns error
-* Improved response headers from proxy
-* Improved validation http/https
+* Added the use of `erro_get_last()`
+* Added support for "Location:" header
+* Added support for detecting 304 HTTP, return an error waring (socket does not use/send Etags)
+* Added `utf8_encode` to `json_encode` to prevent the error string becomes NULL
+* Added an error waring, if there is no the file "Content-type:" header
+* In case of HTTP 3xx response, if there is no "Location:" header, returns an error warning
+* Improved response headers from proxy (`function setHeaders`)
+* Improved validation http/https (`function isHttpUrl`)
 * Prevent waring in `rename()` (PHP 5.2 in CGI), because the waring `return false;`
 * In addition to other improvements when the script was rewritten
 
