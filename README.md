@@ -81,6 +81,7 @@ The ideas here are not ready or are not public in the main script, are only sugg
 * Add .jpe, .jif, .jfif, .jfi extensions
 * Add .bmp extension
 * Add .mng, .apng extensions
+* Etag cache browser for use HTTP 304 (resources are reusable, so making unnecessary downloads)
 
 ### Others scripting language ###
 
