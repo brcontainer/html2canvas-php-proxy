@@ -87,4 +87,4 @@ The ideas here are not ready or are not public in the main script, are only sugg
 You do not use PHP, but need html2canvas working with proxy, see other proxies:
 
 * [html2canvas proxy in asp.net (csharp)](https://github.com/brcontainer/html2canvas-csharp-proxy)
-* [html2canvas proxy in asp classiv (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
+* [html2canvas proxy in asp classic (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
