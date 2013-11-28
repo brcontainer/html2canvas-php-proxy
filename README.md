@@ -78,12 +78,10 @@ The ideas here are not ready or are not public in the main script, are only sugg
 
 * `MAX_EXEC` may not be less than 15 seconds, if less than 15 will show an error message
 * Replace relative path by absolute path (image folder)
-* Add .jpe, .jif, .jfif, .jfi extensions
 * Add .bmp extension
-* Add .mng, .apng extensions
 * Etag cache browser for use HTTP 304 (resources are reusable, so making unnecessary downloads)
-* Cache from SOCKET, if not specified header cache in SOCKET, then uses settings `DEFINE();`
-* Setting to force nocache
+* Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
+* Setting to force no-cache, setup in `DEFINE();`
 
 ### Others scripting language ###
 
