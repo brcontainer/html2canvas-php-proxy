@@ -82,6 +82,8 @@ The ideas here are not ready or are not public in the main script, are only sugg
 * Etag cache browser for use HTTP 304 (resources are reusable, so making unnecessary downloads)
 * Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
 * Setting to force no-cache, setup in `DEFINE();`
+* Replace `$_SERVER['HTTP_HOST']` by other method
+* Add support to PHP4
 
 ### Others scripting language ###
 
