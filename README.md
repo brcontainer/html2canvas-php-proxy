@@ -58,6 +58,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 * Detects if the "host:" header was set by the client
 * Remove port from `$_SERVER['HTTP_HOST']` to prevent problem in the formatting of the address
 * Add function for remove old files
+* Fixed "validate" callback param
 
 #### html2canvas-php-proxy 0.1.0 - 24.11.2013 ####
 
