@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.0
+html2canvas-php-proxy 0.1.1
 =====================
 
 #### PHP Proxy html2canvas ( php 5.2.0+ ) ####
@@ -48,6 +48,17 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.1 - 01.12.2013 ####
+
+* Support for PHP 4.3
+* Replace isset `isset($vector['var']{0})` by `isset($vector['var']) && strlen($vector['var'])>0` to prevent the error `Uninitialized string offset: 0`
+* `MAX_EXEC` may not be less than 15 seconds
+* Add support to bitmap files
+* If the parameter "callback" has invalid characters then sets the variable `$param_callback` with `JSLOG`;
+* Detects if the "host:" header was set by the client
+* Remove port from `$_SERVER['HTTP_HOST']` to prevent problem in the formatting of the address
+* Add function for remove old files
+
 #### html2canvas-php-proxy 0.1.0 - 24.11.2013 ####
 
 * Script completely rewritten
@@ -76,13 +87,8 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 Details of future versions are being studied, in other words, can happen as can be forsaken ideas.
 The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on issues from github.
 
-* `MAX_EXEC` may not be less than 15 seconds, if less than 15 will show an error message
-* Replace relative path by absolute path (image folder)
-* Add .bmp extension
 * Etag cache browser for use HTTP 304 (resources are reusable, so making unnecessary downloads)
 * Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
-* Setting to force no-cache, setup in `DEFINE();`
-* Add support to PHP4
 
 ### Others scripting language ###
 
