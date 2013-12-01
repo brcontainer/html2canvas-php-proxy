@@ -1,7 +1,7 @@
 html2canvas-php-proxy 0.1.1
 =====================
 
-#### PHP Proxy html2canvas ( php 5.2.0+ ) ####
+#### PHP Proxy html2canvas ####
 
 This script allows you to use **html2canvas.js** with different servers, ports and protocols (http, https),
 preventing to occur "tainted" when exporting the `<canvas>` for image.
@@ -15,6 +15,8 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 > Error: An attempt was made to break through the security policy of the user agent.
 
 ### Usage ###
+
+> Note: Requies PHP 4.3.0+
 
 ```html
 <!DOCTYPE html>
