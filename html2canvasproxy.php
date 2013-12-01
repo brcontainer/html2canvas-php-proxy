@@ -1,6 +1,6 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.0
+html2canvas-proxy-php 0.1.1
 Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
@@ -25,7 +25,7 @@ or generate an error in PHP, which does not work with the DEBUG (from html2canva
 */
 $maxExec = ini_get('max_execution_time');
 define('MAX_EXEC', empty($maxExec)||$maxExec<1 ? 0: (int) ($maxExec-5));//reduces 5 seconds to ensure the execution of the DEBUG
-define('INIT_EXEC', isset($_SERVER['REQUEST_TIME']{0}) ? $_SERVER['REQUEST_TIME'] : time());
+define('INIT_EXEC', isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME'])>0 ? $_SERVER['REQUEST_TIME'] : time());
 
 //set mime-type
 header('Content-Type: application/javascript');
@@ -33,32 +33,86 @@ header('Content-Type: application/javascript');
 $param_callback = JSLOG;//force use alternative log error
 $tmp = null;//tmp var usage
 
+function remove_old_files(){
+	if(MAX_EXEC!==0 && (time()-INIT_EXEC)>=MAX_EXEC){
+		//prevents this function locks the process that was completed
+		return null;
+	}
+	$p = PATH . '/';
+	if($h=opendir($p)){
+		while(false!==($f=readdir($h))){
+			if((INIT_EXEC-filectime($p . $f))>(CCACHE*2)){
+				unlink($p . $f);
+			}
+		}
+	}
+}
+
+if(function_exists('error_get_last')===false){
+	//this function does not exist by default in php4.3, error_get_last is only to prevent error message: Function not defined
+	function error_get_last(){ return null; }
+}
+
+function json_encode_string($s){
+	$s = utf8_encode($s);
+	$vetor = Array();
+	$vetor[0]  = '\0';
+	$vetor[8]  = '\b';
+	$vetor[9]  = '\t';
+	$vetor[10] = '\n';
+	$vetor[12] = '\f';
+	$vetor[13] = '\r';
+	$vetor[34] = '\"';
+	$vetor[47] = '\/';
+	$vetor[92] = '\\';
+
+	$e = Array();
+	$j = strlen($s);
+
+	for($i=0;$i<$j;++$i) {
+		$e[$i] = substr($s, $i, 1);
+		$c = ord($e[$i]);
+		if($c > 126){
+			$d = '000' . bin2hex($c);
+			$e[$i] = '\u' . substr($d, strlen($d)-4);
+		} else {
+			if (isset($vetor[$c]) && strlen($vetor[$c])>0) {
+				$e[$i] = $vetor[$c];
+			} else if (!($c > 31)) {
+				$d = '000' . bin2hex($c);
+				$e[$i] = '\u' . substr($d, strlen($d)-4);
+			}
+		}
+	}
+	return '"' . join($e,'') . '"';
+}
+
 function downloadSource($url, $toSource){
 	$uri = parse_url($url);
 	$secure = strcasecmp($uri['scheme'], 'https')===0;
 	if(
 		!$fp = fsockopen(
 			($secure ? 'ssl://':'') . $uri['host'],
-			isset($uri['port']{0}) ? $uri['port'] : ( $secure ? 443 : 80 ),
+			isset($uri['port']) && strlen($uri['port'])>0 ? $uri['port'] : ( $secure ? 443 : 80 ),
 			$errno,
 			$errstr,
 			TIMEOUT
 		)
 	){
-		return $errstr . '(' . $errno . ')';
+		return 'SOCKET: ' . $errstr . '(' . $errno . ')';
 	} else {
 		fwrite(
 			$fp,'GET ' . (
-				isset($uri['path']{0}) ? $uri['path']:'/'
+				isset($uri['path']) && strlen($uri['path'])>0 ? $uri['path']:'/'
 			) . (
-				isset($uri['query']{0}) ? ('?' . $uri['query']):''
+				isset($uri['query']) && strlen($uri['query'])>0 ? ('?' . $uri['query']):''
 			) . ' HTTP/1.0' . EOL
 		);
 
-		if(isset($_SERVER['HTTP_ACCEPT']{0})){
+		if(isset($_SERVER['HTTP_ACCEPT']) && strlen($_SERVER['HTTP_ACCEPT'])>0){
 			fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . EOL);
 		}
-		if(isset($_SERVER['HTTP_USER_AGENT']{0})){
+		if(isset($_SERVER['HTTP_USER_AGENT']) && strlen($_SERVER['HTTP_USER_AGENT'])>0){
 			fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . EOL);
 		}
 		fwrite($fp, 'Host: ' . $uri['host'] . EOL);
@@ -75,7 +129,7 @@ function downloadSource($url, $toSource){
 			}
 			if(($data = fgets($fp))===false){ continue; }
 			if($isHttp===null){
-				if(stripos($data,'HTTP/1.')!==0){
+				if(!preg_match('#^HTTP[/]1[.]#i',$data)){
 					fclose($fp);//Close connection
 					$data = '';
 					return 'This request did not return a HTTP response valid';
@@ -98,7 +152,7 @@ function downloadSource($url, $toSource){
 				}
 			}
 			if($isBody===false){
-				if(stripos($data, 'location:')===0){//200 force 302
+				if(preg_match('#^location[:]#i',$data)){//200 force 302
 					fclose($fp);//Close connection
 					$data = trim(preg_replace('#^location[:]#i', '', $data));
 					if(!isHttpUrl($data)){
@@ -111,12 +165,13 @@ function downloadSource($url, $toSource){
 					fclose($fp);//Close connection
 					$data = '';
 					return 'source is blank (Content-length: 0)';
-				} else if(stripos($data, 'content-type:')===0){
+				} else if(preg_match('#^content[-]type[:]#i', $data)){
 					$mime = trim(str_replace('content-type:', '',
 						str_replace('/x-', '/', strtolower($data))
 					));
 
 					if(!in_array($mime, Array(
+						'image/bmp','image/windows-bmp','image/ms-bmp',
 						'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
 						'text/html', 'application/xhtml', 'application/xhtml+xml'
 					))){
@@ -162,7 +217,7 @@ function setHeaders($nocache){
 		header('ETag: ' . md5(GMDATECACHE . ' GMT'));
 		header('Cache-Control: max-age=' . (CCACHE-1) . ', must-revalidate');
 		header('Pragma: max-age=' . (CCACHE-1));
-		header('Expires: ' . gmdate('D, d M Y H:i:s', $_SERVER['REQUEST_TIME'] + (CCACHE-1)));
+		header('Expires: ' . gmdate('D, d M Y H:i:s', INIT_EXEC + (CCACHE-1)));
 		header('Access-Control-Max-Age:' . CCACHE);
 	} else {
 		//no-cache
@@ -197,7 +252,7 @@ function createTmpFile($basename, $isEncode){
 
 	$basename .= $basename;
 	$tmpMime = '.' . mt_rand(0,1000) . '_' . ($isEncode ? (
-		isset($_SERVER['REQUEST_TIME']{0}) ? $_SERVER['REQUEST_TIME'] : time()
+		isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME'])>0 ? $_SERVER['REQUEST_TIME'] : time()
 	):INIT_EXEC);
 
 	if(file_exists($folder . $basename . $tmpMime)){
@@ -213,22 +268,25 @@ function createTmpFile($basename, $isEncode){
 	return false;
 }
 
-if(!isset($_GET['callback']{0})){
-	$response = 'No such param "callback"';
-} else {
+if(isset($_GET['callback']) && strlen($_GET['callback'])>0){
 	$param_callback = $_GET['callback'];
 }
 
-if(!isset($_GET['url']{0})){
+if(!(isset($_SERVER['HTTP_HOST']) && strlen($_SERVER['HTTP_HOST'])>0)){
+	$response = 'The client did not send the Host header';
+} else if(MAX_EXEC<10){
+	$response = 'Execution time is less 15 seconds, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended time is 30 seconds or more';
+} else if(!isset($_GET['url']) && strlen($_GET['url'])>0){
 	$response = 'No such parameter "url"';
 } else if(!isHttpUrl($_GET['url'])){
 	$response = 'Only http scheme and https scheme are allowed';
-} else if(preg_match('#[^A-Za-z0-9_]#', $_GET['callback'])){
+} else if(preg_match('#[^A-Za-z0-9_]#', $param_callback)){
 	$response = 'Parameter "callback" contains invalid characters';
+	$param_callback = JSLOG;
 } else if(!createFolder()){
 	$err = error_get_last();
 	$response = 'Can not create directory'. (
-		isset($err['message']{0}) ? (': ' . $err['message']):''
+		isset($err['message']) && strlen($err['message'])>0 ? (': ' . $err['message']):''
 	);
 	$err = null;
 } else {
@@ -236,7 +294,7 @@ if(!isset($_GET['url']{0})){
 	if($tmp===false){
 		$err = error_get_last();
 		$response = 'Can not create file'. (
-			isset($err['message']{0}) ? (': ' . $err['message']):''
+			isset($err['message']) && strlen($err['message'])>0 ? (': ' . $err['message']):''
 		);
 		$err = null;
 	} else {
@@ -245,17 +303,19 @@ if(!isset($_GET['url']{0})){
 	}
 }
 
-if(is_array($response) && isset($response['mime']{0})){
+if(is_array($response) && isset($response['mime']) && strlen($response['mime'])>0){
 	clearstatcache();
 	if(!file_exists($tmp['location'])){
 		$response = 'An error and the file can not be found occurred, try again';
 	} else if(filesize($tmp['location'])<1){
 		$response = 'Download the file was made, but there was some problem and now the file is empty, try again';
 	} else {
-		$response['mime'] = str_replace('jpeg', 'jpg', //jpeg to jpg extesion
-			str_replace('xhtml+xml', 'xhtml',//fix mime to xhtml
-				str_replace(Array('image/', 'text/', 'application/'), '',
-					$response['mime']
+		$response['mime'] = str_replace(Array('windows-bmp','ms-bmp'), 'bmp', //mimetype bitmap to bmp extension
+			str_replace('jpeg', 'jpg', //jpeg to jpg extesion
+				str_replace('xhtml+xml', 'xhtml',//fix mime to xhtml
+					str_replace(Array('image/', 'text/', 'application/'), '',
+						$response['mime']
+					)
 				)
 			)
 		);
@@ -272,10 +332,12 @@ if(is_array($response) && isset($response['mime']{0})){
 			//set cache
 			setHeaders(false);
 
+			remove_old_files();
+
 			echo $param_callback, '(',
-				json_encode(
+				json_encode_string(
 					($_SERVER['SERVER_PORT']==443 ? 'https://':'http://') .
-					$_SERVER['HTTP_HOST'] .
+					preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
 					($_SERVER['SERVER_PORT']==80 || $_SERVER['SERVER_PORT']==443 ? '':(
 						':'.$_SERVER['SERVER_PORT']
 					)) .
@@ -298,10 +360,11 @@ if(is_array($tmp) && isset($tmp['location']) && file_exists($tmp['location'])){
 //errors
 setHeaders(true);//no-cache
 
+remove_old_files();
+
 echo $param_callback, '(',
-	json_encode(
-		'error: html2canvas-proxy-php: ' .
-		utf8_encode($response) //Prevent NULL in json convertion
+	json_encode_string(
+		'error: html2canvas-proxy-php: ' . $response
 	),
 ');';
 ?>
