@@ -280,7 +280,7 @@ if(!(isset($_SERVER['HTTP_HOST']) && strlen($_SERVER['HTTP_HOST'])>0)){
 	$response = 'No such parameter "url"';
 } else if(!isHttpUrl($_GET['url'])){
 	$response = 'Only http scheme and https scheme are allowed';
-} else if(preg_match('#[^A-Za-z0-9_]#', $param_callback)){
+} else if(preg_match('#[^A-Za-z0-9_\.]#', $param_callback)){
 	$response = 'Parameter "callback" contains invalid characters';
 	$param_callback = JSLOG;
 } else if(!createFolder()){
