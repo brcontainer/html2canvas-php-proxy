@@ -1,6 +1,6 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.1
+html2canvas-proxy-php 0.1.2
 Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
@@ -48,7 +48,7 @@ function remove_old_files(){
 	}
 }
 
-if(function_exists('error_get_last')===false){
+if(!function_exists('error_get_last')===false){
 	//this function does not exist by default in php4.3, error_get_last is only to prevent error message: Function not defined
 	function error_get_last(){ return null; }
 }
@@ -280,7 +280,7 @@ if(!(isset($_SERVER['HTTP_HOST']) && strlen($_SERVER['HTTP_HOST'])>0)){
 	$response = 'No such parameter "url"';
 } else if(!isHttpUrl($_GET['url'])){
 	$response = 'Only http scheme and https scheme are allowed';
-} else if(preg_match('#[^A-Za-z0-9_\.]#', $param_callback)){
+} else if(preg_match('#[^A-Za-z0-9_\.\[\]]#', $param_callback)){
 	$response = 'Parameter "callback" contains invalid characters';
 	$param_callback = JSLOG;
 } else if(!createFolder()){
