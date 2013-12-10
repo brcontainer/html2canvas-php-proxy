@@ -48,7 +48,7 @@ function remove_old_files(){
 	}
 }
 
-if(!function_exists('error_get_last')===false){
+if(function_exists('error_get_last') === false){
 	//this function does not exist by default in php4.3, error_get_last is only to prevent error message: Function not defined
 	function error_get_last(){ return null; }
 }
