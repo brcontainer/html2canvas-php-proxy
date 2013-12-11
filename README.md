@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.2
+html2canvas-php-proxy 0.1.3
 =====================
 
 #### PHP Proxy html2canvas ####
