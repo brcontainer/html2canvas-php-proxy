@@ -16,7 +16,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 ### Usage ###
 
-> Note: Requies PHP 4.3.0+
+> Note: Requires PHP 4.3.0+
 
 ```html
 <!DOCTYPE html>
@@ -53,7 +53,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 #### html2canvas-php-proxy 0.1.1 - 01.12.2013 ####
 
 * Support for PHP 4.3
-* Replace isset `isset($vector['var']{0})` by `isset($vector['var']) && strlen($vector['var'])>0` to prevent the error `Uninitialized string offset: 0`
+* Replace `isset($vector['var']{0})` by `isset($vector['var']) && strlen($vector['var'])>0` to prevent the error `Uninitialized string offset: 0`
 * `MAX_EXEC` may not be less than 15 seconds
 * Add support to bitmap files
 * If the parameter "callback" has invalid characters then sets the variable `$param_callback` with `JSLOG`;
@@ -88,9 +88,9 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 ### Next version ###
 
 Details of future versions are being studied, in other words, can happen as can be forsaken ideas.
-The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on issues from github.
+The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on [issues](https://github.com/brcontainer/html2canvas-php-proxy/issues/new).
 
-* Etag cache browser for use HTTP 304 (resources are reusable, so making unnecessary downloads)
+* Etag cache browser for use HTTP 304 (resources are reusable, avoiding unnecessary downloads)
 * Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
 
 ### Others scripting language ###
