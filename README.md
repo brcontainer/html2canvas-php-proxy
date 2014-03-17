@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.3
+html2canvas-php-proxy 0.1.4
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -27,7 +27,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 		<script src="html2canvas.js"></script>
 		<script>
 			window.onload = function(){
-				html2canvas( [ document.body ], {
+				html2canvas(document.body, {
 					"proxy":"html2canvasproxy.php",
 					"onrendered": function(canvas) {
 						var uridata = canvas.toDataURL("image/png");
