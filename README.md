@@ -14,6 +14,10 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 >
 > Error: An attempt was made to break through the security policy of the user agent.
 
+### Follow ###
+
+I ask you to [follow me](https://github.com/users/follow?target=nowrep), or ["star"](https://github.com/brcontainer/html2canvas-php-proxy/star) my repository to track updates
+
 ### Usage ###
 
 > Note: Requires PHP 4.3.0+
