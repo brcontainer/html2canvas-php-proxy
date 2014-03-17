@@ -50,6 +50,16 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014 ####
+
+* Added support to javascript functions basead in Objects (update to 0.1.2)
+* Fixed bug in 0.1.2 (update to 0.1.3)
+* Added support to "relative paths" (function relative2absolute) (0.1.4)
+* Added "referer header" (if exists) (0.1.4)
+* Added "remove charset" for mime-types (eg. text/html; charset=ut8 => text/html) (0.1.4)
+* Added prefix in files created by html2canvas-php-proxy (0.1.4)
+* "remove_old_files function" removes only the files with prefix (0.1.4)
+
 #### html2canvas-php-proxy 0.1.1 - 01.12.2013 ####
 
 * Support for PHP 4.3
