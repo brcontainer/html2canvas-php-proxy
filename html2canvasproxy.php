@@ -1,7 +1,7 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.3
-Copyright (c) 2013 Guilherme Nascimento (brcontainer@yahoo.com.br)
+html2canvas-proxy-php 0.1.4
+Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
 */
@@ -27,6 +27,8 @@ $maxExec = ini_get('max_execution_time');
 define('MAX_EXEC', empty($maxExec)||$maxExec<1 ? 0: (int) ($maxExec-5));//reduces 5 seconds to ensure the execution of the DEBUG
 define('INIT_EXEC', isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME'])>0 ? $_SERVER['REQUEST_TIME'] : time());
 
+define('SECPREFIX', 'h2c_');
+
 //set mime-type
 header('Content-Type: application/javascript');
 
@@ -41,7 +43,12 @@ function remove_old_files(){
 	$p = PATH . '/';
 	if($h=opendir($p)){
 		while(false!==($f=readdir($h))){
-			if((INIT_EXEC-filectime($p . $f))>(CCACHE*2)){
+			if(
+				is_file($p . $f) &&
+				!is_dir($p . $f) &&
+				strpos($f, SECPREFIX)!==false &&
+				(INIT_EXEC-filectime($p . $f))>(CCACHE*2)
+			){
 				unlink($p . $f);
 			}
 		}
@@ -90,6 +97,7 @@ function json_encode_string($s){
 function downloadSource($url, $toSource){
 	$uri = parse_url($url);
 	$secure = strcasecmp($uri['scheme'], 'https')===0;
+	
 	if(
 		!$fp = fsockopen(
 			($secure ? 'ssl://':'') . $uri['host'],
@@ -102,7 +110,7 @@ function downloadSource($url, $toSource){
 		return 'SOCKET: ' . $errstr . '(' . $errno . ')';
 	} else {
 		fwrite(
-			$fp,'GET ' . (
+			$fp, 'GET ' . (
 				isset($uri['path']) && strlen($uri['path'])>0 ? $uri['path']:'/'
 			) . (
 				isset($uri['query']) && strlen($uri['query'])>0 ? ('?' . $uri['query']):''
@@ -115,6 +123,11 @@ function downloadSource($url, $toSource){
 		if(isset($_SERVER['HTTP_USER_AGENT']) && strlen($_SERVER['HTTP_USER_AGENT'])>0){
 			fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . EOL);
 		}
+
+		if(isset($_SERVER['HTTP_REFERER']) && strlen($_SERVER['HTTP_REFERER'])>0){
+			fwrite($fp, 'Referer: ' . $_SERVER['HTTP_REFERER'] . EOL);
+		}
+
 		fwrite($fp, 'Host: ' . $uri['host'] . EOL);
 		fwrite($fp, 'Connection: close' . EOL . EOL);
 
@@ -154,11 +167,16 @@ function downloadSource($url, $toSource){
 			if($isBody===false){
 				if(preg_match('#^location[:]#i',$data)){//200 force 302
 					fclose($fp);//Close connection
+					
 					$data = trim(preg_replace('#^location[:]#i', '', $data));
+					if($data===''){
+						return '"Location:" header is blank';
+					}
+
+					$data = relative2absolute($url, $data);
+					
 					if(!isHttpUrl($data)){
-						return $data==='' ? '"Location:" header is blank':(
-							'"Location:" header redirected for a non-http url (' . $data . ')'
-						);
+						return '"Location:" header redirected for a non-http url (' . $data . ')';
 					}
 					return downloadSource($data, $toSource);
 				} else if(preg_match('#^content[-]length[:]( 0|0)$#i', $data)){
@@ -166,9 +184,13 @@ function downloadSource($url, $toSource){
 					$data = '';
 					return 'source is blank (Content-length: 0)';
 				} else if(preg_match('#^content[-]type[:]#i', $data)){
-					$mime = trim(str_replace('content-type:', '',
-						str_replace('/x-', '/', strtolower($data))
-					));
+					$mime = trim(
+						preg_replace('/[;]([\s\S]|)+$/', '', 
+							str_replace('content-type:', '',
+								str_replace('/x-', '/', strtolower($data))
+							)
+						)
+					);
 
 					if(!in_array($mime, Array(
 						'image/bmp','image/windows-bmp','image/ms-bmp',
@@ -233,6 +255,36 @@ function setHeaders($nocache){
 	header('Access-Control-Allow-Headers: *');
 }
 
+function relative2absolute($u, $m){
+	if(strpos($m, '//')===0){
+		return 'http:' . $m;
+	}
+
+	if(!!preg_match('#^[a-zA-Z0-9]+[:]#', $m)){
+		return $m;
+	}
+
+	if(!!preg_match('/^[?#]/', $m)){
+		return $u . $m;
+	}
+
+	$pu = parse_url($u);
+	$pu['path'] = isset($pu['path']) ? preg_replace('#/[^/]*$#', '', $pu['path']) : '';
+
+	if(stripos($m, '/')===0){
+		$pu['path'] = '';
+	}
+
+	$abs = $pu['host'] . (
+		isset($pu['port']) ? $pu['port'] : ''
+	) . $pu['path'] . '/' . $m;
+
+	$re = Array('#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#');
+	for($n=1; $n>0;  $abs = preg_replace($re, '/', $abs, -1, $n)){}
+
+	return $pu['scheme'] . '://' . $abs;
+}
+
 function isHttpUrl($u){
 	return !!preg_match('#^http(|s)[:]\/\/[a-z0-9]#i', $u);
 }
@@ -247,10 +299,10 @@ function createFolder(){
 function createTmpFile($basename, $isEncode){
 	$folder = preg_replace('#\/$#', '', PATH).'/';
 	if($isEncode===false){
-		$basename = sha1($basename);
+		$basename = SECPREFIX . sha1($basename);
 	}
 
-	$basename .= $basename;
+	//$basename .= $basename;
 	$tmpMime = '.' . mt_rand(0,1000) . '_' . ($isEncode ? (
 		isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME'])>0 ? $_SERVER['REQUEST_TIME'] : time()
 	):INIT_EXEC);
