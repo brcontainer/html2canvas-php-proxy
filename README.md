@@ -16,7 +16,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 ### Follow ###
 
-I ask you to follow me or ["star"](https://github.com/brcontainer/html2canvas-php-proxy/star) my repository to track updates
+I ask you to follow me or "star" my repository to track updates
 
 ### Usage ###
 
