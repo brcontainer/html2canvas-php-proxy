@@ -30,6 +30,8 @@ I ask you to follow me or "star" my repository to track updates
 		<title>html2canvas php proxy</title>
 		<script src="html2canvas.js"></script>
 		<script>
+		//<![CDATA[
+		(function() {
 			window.onload = function(){
 				html2canvas(document.body, {
 					"proxy":"html2canvasproxy.php",
@@ -39,6 +41,8 @@ I ask you to follow me or "star" my repository to track updates
 					}
 				});
 			};
+		})();
+		//]]>
 		</script>
 	</head>
 	<body>
