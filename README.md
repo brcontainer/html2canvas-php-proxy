@@ -34,6 +34,7 @@ I ask you to follow me or "star" my repository to track updates
 		(function() {
 			window.onload = function(){
 				html2canvas(document.body, {
+					"logging": true, //Enable log (use Web Console for get Errors and Warings)
 					"proxy":"html2canvasproxy.php",
 					"onrendered": function(canvas) {
 						var img = new Image();
@@ -65,6 +66,27 @@ I ask you to follow me or "star" my repository to track updates
 	</body>
 </html>
 ```
+
+#### Using Web Cosnole ####
+
+If you have any problems with the script recommend to analyze the log using the Web Console from your browser:
+* Firefox: https://developer.mozilla.org/en-US/docs/Tools/Browser_Console
+* Chrome: https://developers.google.com/chrome-developer-tools/docs/console
+* InternetExplorer: http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx
+
+Get NetWork results:
+* Firefox: https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/
+* Chrome: https://developers.google.com/chrome-developer-tools/docs/network
+* InternetExplorer: http://msdn.microsoft.com/en-us/library/gg130952%28v=vs.85%29.aspx
+
+An alternative is to diagnose problems accessing the link directly:
+
+`http://[DOMAIN]/[PATH]/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&callback=html2canvas_0`
+
+Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your project folder (eg. project-1/test), something like:
+
+`http://localhost/project-1/test/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&callback=html2canvas_0`
+
 
 ### Changelog ###
 
