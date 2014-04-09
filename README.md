@@ -36,8 +36,18 @@ I ask you to follow me or "star" my repository to track updates
 				html2canvas(document.body, {
 					"proxy":"html2canvasproxy.php",
 					"onrendered": function(canvas) {
-						var uridata = canvas.toDataURL("image/png");
-						window.open(uridata);
+						var img = new Image();
+						img.onload = function() {
+							document.body.appendChild(img);
+						};
+						img.error = function() {
+							if(window.console.log) {
+								window.console.log("Not loaded image from canvas.toDataURL");
+							} else {
+								alert("Not loaded image from canvas.toDataURL");
+							}
+						};
+						img.src = canvas.toDataURL("image/png");
 					}
 				});
 			};
