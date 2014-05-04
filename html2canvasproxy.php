@@ -125,7 +125,7 @@ function json_encode_string($s) {
  * download http request recursive (If found HTTP 3xx)
  * @param string $url               to download
  * @param resource $toSource        to download
- * @return array|string             If Ok return array, If has an error return string
+ * @return array                    retuns array
 */
 function downloadSource($url, $toSource) {
 	$errno = 0;
