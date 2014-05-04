@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.4
+html2canvas-php-proxy 0.1.5
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -89,6 +89,26 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 
 ### Changelog ###
+
+#### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
+
+* Improved "typing" for better updates/pull-request
+* Converted variuos variables to (int)
+* removed must-revalidate in header
+* Improved forks
+* Improved http response, If http_status<>200, return error in html2canvas
+* Fixed bug in Facebook redirect (HTTP/1.1 302 forced.302)
+* Removed unnecessary Etag-header
+* Fixed undefined variables
+* Fixed bug in `json_encode_string` (characters)
+* Fixed "invalid escapes" in `json_encode_string`
+* Improved perfomance in `json_encode_string`
+* Removed `utf8_encode` (unecessary) in `json_encode_string`
+* Fixed bug in `relative2absolute`
+* `downloadSource` always returns array
+* Replace `error_get_last` by `get_error`
+* Added coments in functions
+
 
 #### html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014 ####
 
