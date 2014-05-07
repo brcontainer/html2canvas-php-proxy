@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.6
+html2canvas-php-proxy 0.1.7
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -89,7 +89,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 ### Changelog ###
 
-#### html2canvas-php-proxy 0.1.6 - 07.05.2014 ####
+#### html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014 ####
 
 * Changed order of functions
 * Removed `$e` variable (unused) in `json_encode`
@@ -97,6 +97,8 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Removed incompatibility with PHP old versions (before 5.1.0) in `relative2absolute`
 * Added returns "blank" in `relative2absolute` (if `scheme` invalid in `$m` parameter)
 * Added detect problem in redirects (if you have multiple redirects)
+* Replace `stripos` by `strpos` (php4) - version 0.1.7
+* Added comparison of "socket time limit (timeout)" and "max_execution_time" (php.ini), preventing the page goes blank - version 0.1.7
 
 
 #### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
