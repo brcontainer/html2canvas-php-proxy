@@ -163,7 +163,7 @@ function relative2absolute($u, $m) {
 	$ik = 0;
 
 	if(strpos($m, '//') === 0) {//http link //site.com/test
-		return 'http:' . $m;
+		$m = 'http:' . $m;
 	}
 
 	if(preg_match('#^[a-zA-Z0-9]+[:]#', $m) !== 0) {
