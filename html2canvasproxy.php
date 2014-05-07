@@ -1,12 +1,12 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.5
+html2canvas-proxy-php 0.1.6
 Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
 */
 
-error_reporting(0);//Turn off erros because the script already own uses error_get_last
+error_reporting(E_ALL|E_STRICT);//Turn off erros because the script already own uses error_get_last
 
 //constants
 define('EOL', chr(10));
@@ -18,6 +18,7 @@ define('JSLOG', 'console.log'); //Configure alternative function log, eg. consol
 define('PATH', 'images');//relative folder where the images are saved
 define('CCACHE', 60 * 5 * 1000);//Limit access-control and cache, define 0/false/null/-1 to not use "http heade cache"
 define('TIMEOUT', 30);//Timeout from load Socket
+define('MAX_LOOP', 10);//Configure loop limit for redirect (location header)
 
 /*
 If execution has reached the time limit prevents page goes blank (off errors)
@@ -31,8 +32,8 @@ if(isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME']) > 0) {
 } else {
 	$initExec = time();
 }
-define('INIT_EXEC', $initExec);
 
+define('INIT_EXEC', $initExec);
 define('SECPREFIX', 'h2c_');
 
 $http_port = 0;
@@ -42,7 +43,12 @@ header('Content-Type: application/javascript');
 
 $param_callback = JSLOG;//force use alternative log error
 $tmp = null;//tmp var usage
+$response = array();
 
+/**
+ * set headers in document
+ * @return void           return always void
+ */
 function remove_old_files() {
 	$p = PATH . '/';
 
@@ -70,7 +76,7 @@ function remove_old_files() {
  * this function does not exist by default in php4.3,
  * error_get_last is only to prevent error message: Function not defined
  * @return array   if has errors
-*/
+ */
 function get_error() {
 	if(function_exists('error_get_last') === false) {
 		return error_get_last();
@@ -82,7 +88,7 @@ function get_error() {
  * enconde string in json
  * @param string $s    to encode
  * @return string      always return string
-*/
+ */
 function json_encode_string($s) {
 	$vetor = array();
 	$vetor[0]  = '\\0';
@@ -97,7 +103,6 @@ function json_encode_string($s) {
 
 	$tmp = '';
 	$enc = '';
-	$e = array();
 	$j = strlen($s);
 
 	for($i = 0; $i < $j; ++$i) {
@@ -122,14 +127,184 @@ function json_encode_string($s) {
 }
 
 /**
+ * set headers in document
+ * @param boolean $nocache      If false set cache (if CCACHE > 0), If true set no-cache in document
+ * @return void                 return always void
+ */
+function setHeaders($nocache) {
+	if($nocache === false && is_int(CCACHE) && CCACHE > 0) {
+		//save to browser cache
+		header('Last-Modified: ' . GMDATECACHE . ' GMT');
+		header('Cache-Control: max-age=' . (CCACHE - 1));
+		header('Pragma: max-age=' . (CCACHE - 1));
+		header('Expires: ' . gmdate('D, d M Y H:i:s', INIT_EXEC + CCACHE - 1));
+		header('Access-Control-Max-Age:' . CCACHE);
+	} else {
+		//no-cache
+		header('Pragma: no-cache');
+		header('Cache-Control: no-cache');
+		header('Expires: '. GMDATECACHE .' GMT');
+	}
+
+	//set access-control
+	header('Access-Control-Allow-Origin: *');
+	header('Access-Control-Request-Method: *');
+	header('Access-Control-Allow-Methods: OPTIONS, GET');
+	header('Access-Control-Allow-Headers: *');
+}
+
+/**
+ * Converte relative-url to absolute-url
+ * @param string $u       set base url
+ * @param string $m       set relative url
+ * @return string         return always string, if have an error, return blank string (scheme invalid)
+*/
+function relative2absolute($u, $m) {
+	if(strpos($m, '//') === 0) {//http link //site.com/test
+		return 'http:' . $m;
+	}
+
+	if(preg_match('#^[a-zA-Z0-9]+[:]#', $m) !== 0) {
+		$pu = parse_url($m);
+		if(preg_match('/^(http|https)$/i', $pu['scheme']) === 0) {
+			return '';
+		}
+
+		$m = '';
+		if(isset($pu['path']) !== false) {
+			$m .= $pu['path'];
+		}
+		if(isset($pu['query']) !== false) {
+			$m .= '?' . $pu['query'];
+		}
+		if(isset($pu['fragment']) !== false) {
+			$m .= '#' . $pu['fragment'];
+		}
+		return relative2absolute($pu['scheme'] . '://' . $pu['host'], $m);
+	}
+
+	if(preg_match('/^[?#]/', $m) !== 0) {
+		return $u . $m;
+	}
+
+	$pu = parse_url($u);
+	$pu['path'] = isset($pu['path']) ? preg_replace('#/[^/]*$#', '', $pu['path']) : '';
+
+	$pm = parse_url('http://1/' . $m);
+	$pm['path'] = isset($pm['path']) ? $pm['path'] : '';
+
+	$isPath = $pm['path'] !== '' && stripos(strrev($pm['path']), '/') === 0 ? true : false;
+
+	if(strpos($m, '/') === 0) {
+		$pu['path'] = '';
+	}
+
+	$b = $pu['path'] . '/' . $pm['path'];
+	$b = str_replace(array('/', '\\'), '/', $b);
+
+	$ab = explode('/', $b);
+	$j = count($ab);
+
+	$ab = array_filter($ab, 'strlen');
+	$nw = array();
+
+	for($i = 0; $i < $j; $i++) {
+		if(isset($ab[$i]) === false || $ab[$i] === '.') {
+			continue;
+		}
+		if($ab[$i] === '..') {
+			array_pop($nw);
+		} else {
+			$nw[] = $ab[$i];
+		}
+	}
+
+	$m  = $pu['scheme'] . '://' . $pu['host'] . '/' . implode('/', $nw) . ($isPath === true ? '/' : '');
+
+	if(isset($pm['query'])) {
+		$m .= '?' . $pm['query'];
+	}
+
+	if(isset($pm['fragment'])) {
+		$m .= '#' . $pm['fragment'];
+	}
+
+	$nw = null;
+	$ab = null;
+	$pm = null;
+	$pu = null;
+
+	return $m;
+}
+
+/**
+ * validate url
+ * @param string $u  set base url
+ * @return boolean   return always boolean
+*/
+function isHttpUrl($u) {
+	return preg_match('#^http(|s)[:][/][/][a-z0-9]#i', $u) !== 0;
+}
+
+/**
+ * create folder for images download
+ * @return boolean      return always boolean
+*/
+function createFolder() {
+	if(file_exists(PATH) === false || is_dir(PATH) === false) {
+		return true === mkdir(PATH, 755);
+	}
+	return true;
+}
+
+/**
+ * create temp file which will receive the download
+ * @param string  $basename		set url
+ * @param boolean $isEncode		If true uses the "first" temporary name
+ * @return boolean|array		If you can not create file return false, If create file return array
+*/
+function createTmpFile($basename, $isEncode) {
+	$folder = preg_replace('#[/]$#', '', PATH) . '/';
+	if($isEncode === false) {
+		$basename = SECPREFIX . sha1($basename);
+	}
+
+	//$basename .= $basename;
+	$tmpMime = '.' . mt_rand(0,1000) . '_';
+	if ($isEncode === true) {
+		$tmpMime .= isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME']) > 0 ? $_SERVER['REQUEST_TIME'] : (string) time();
+	} else {
+		$tmpMime .= (string) INIT_EXEC;
+	}
+
+	if(file_exists($folder . $basename . $tmpMime) === true) {
+		return createTmpFile($basename, true);
+	}
+
+	$source = fopen($folder . $basename . $tmpMime, 'w');
+	if($source !== false) {
+		return array(
+			'location' => $folder . $basename . $tmpMime,
+			'source' => $source
+		);
+	}
+	return false;
+}
+
+/**
  * download http request recursive (If found HTTP 3xx)
  * @param string $url               to download
  * @param resource $toSource        to download
  * @return array                    retuns array
 */
-function downloadSource($url, $toSource) {
+function downloadSource($url, $toSource, $caller) {
 	$errno = 0;
 	$errstr = '';
+	$caller++;
+
+	if($caller > MAX_LOOP) {
+		return array('error' => 'the limit of ' . MAX_LOOP . ' redirects was exceeded, maybe there is a problem: ' . $url);
+	}
 
 	$uri = parse_url($url);
 	$secure = strcasecmp($uri['scheme'], 'https') === 0;
@@ -210,12 +385,17 @@ function downloadSource($url, $toSource) {
 						return array('error' => '"Location:" header is blank');
 					}
 
+					$nextUri = $data;
 					$data = relative2absolute($url, $data);
+
+					if($data === '') {
+						return array('error' => 'Invalid scheme in url (' . $nextUri . ')');
+					}
 					
 					if(isHttpUrl($data) === false) {
 						return array('error' => '"Location:" header redirected for a non-http url (' . $data . ')');
 					}
-					return downloadSource($data, $toSource);
+					return downloadSource($data, $toSource, $caller);
 				} else if(preg_match('#^content[-]length[:]( 0|0)$#i', $data) !== 0) {
 					fclose($fp);
 					$data = '';
@@ -269,125 +449,6 @@ function downloadSource($url, $toSource) {
 	}
 }
 
-/**
- * set headers in document
- * @param boolean $nocache      If false set cache (if CCACHE > 0), If true set no-cache in document
- * @return void                 return always void
-*/
-function setHeaders($nocache) {
-	if($nocache === false && is_int(CCACHE) && CCACHE > 0) {
-		//save to browser cache
-		header('Last-Modified: ' . GMDATECACHE . ' GMT');
-		header('Cache-Control: max-age=' . (CCACHE - 1));
-		header('Pragma: max-age=' . (CCACHE - 1));
-		header('Expires: ' . gmdate('D, d M Y H:i:s', INIT_EXEC + CCACHE - 1));
-		header('Access-Control-Max-Age:' . CCACHE);
-	} else {
-		//no-cache
-		header('Pragma: no-cache');
-		header('Cache-Control: no-cache');
-		header('Expires: '. GMDATECACHE .' GMT');
-	}
-
-	//set access-control
-	header('Access-Control-Allow-Origin: *');
-	header('Access-Control-Request-Method: *');
-	header('Access-Control-Allow-Methods: OPTIONS, GET');
-	header('Access-Control-Allow-Headers: *');
-}
-
-/**
- * Converte relative-url to absolute-url
- * @param string $u set base url
- * @param string $m set relative url
- * @return string   return always string
-*/
-function relative2absolute($u, $m) {
-	if(strpos($m, '//') === 0) {
-		return 'http:' . $m;
-	}
-
-	if(preg_match('#^[a-zA-Z0-9]+[:]#', $m) !== 0) {
-		return $m;
-	}
-
-	if(preg_match('/^[?#]/', $m) !== 0) {
-		return $u . $m;
-	}
-
-	$pu = parse_url($u);
-	$pu['path'] = isset($pu['path']) ? preg_replace('#/[^/]*$#', '', $pu['path']) : '';
-
-	if(stripos($m, '/') === 0) {
-		$pu['path'] = '';
-	}
-
-	$abs = '???/???/???/' . $pu['path'] . '/' . $m;
-
-	$re = array('#(/[.]?/)#', '#/(?![.][.])[^/]+/[.][.]/#');
-	for($n = 1; $n > 0;  $abs = preg_replace($re, '/', $abs, -1, $n)) {}
-
-	$abs = $pu['host'] . (
-		isset($pu['port']) ? $pu['port'] : ''
-	) . '/' . str_replace('???/', '', $abs);
-
-	return $pu['scheme'] . '://' . $abs;
-}
-
-/**
- * validate url
- * @param string $u  set base url
- * @return boolean   return always boolean
-*/
-function isHttpUrl($u) {
-	return preg_match('#^http(|s)[:][/][/][a-z0-9]#i', $u) !== 0;
-}
-
-/**
- * create folder for images download
- * @return boolean      return always boolean
-*/
-function createFolder() {
-	if(file_exists(PATH) === false || is_dir(PATH) === false) {
-		return true === mkdir(PATH, 755);
-	}
-	return true;
-}
-
-/**
- * create temp file which will receive the download
- * @param string  $basename		set url
- * @param boolean $isEncode		If true uses the "first" temporary name
- * @return boolean|array		If you can not create file return false, If create file return array
-*/
-function createTmpFile($basename, $isEncode) {
-	$folder = preg_replace('#[/]$#', '', PATH) . '/';
-	if($isEncode === false) {
-		$basename = SECPREFIX . sha1($basename);
-	}
-
-	//$basename .= $basename;
-	$tmpMime = '.' . mt_rand(0,1000) . '_';
-	if ($isEncode === true) {
-		$tmpMime .= isset($_SERVER['REQUEST_TIME']) && strlen($_SERVER['REQUEST_TIME']) > 0 ? $_SERVER['REQUEST_TIME'] : (string) time();
-	} else {
-		$tmpMime .= (string) INIT_EXEC;
-	}
-
-	if(file_exists($folder . $basename . $tmpMime) === true) {
-		return createTmpFile($basename, true);
-	}
-
-	$source = fopen($folder . $basename . $tmpMime, 'w');
-	if($source !== false) {
-		return array(
-			'location' => $folder . $basename . $tmpMime,
-			'source' => $source
-		);
-	}
-	return false;
-}
-
 if(isset($_GET['callback']) !== false && strlen($_GET['callback']) > 0) {
 	$param_callback = $_GET['callback'];
 }
@@ -422,7 +483,7 @@ if(isset($_SERVER['HTTP_HOST']) === false || strlen($_SERVER['HTTP_HOST']) === 0
 		));
 		$err = null;
 	} else {
-		$response = downloadSource($_GET['url'], $tmp['source']);
+		$response = downloadSource($_GET['url'], $tmp['source'], 0);
 		fclose($tmp['source']);
 	}
 }
@@ -471,7 +532,7 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
 			');';
 			exit;
 		} else {
-			$response = 'Failed to rename the temporary file';
+			$response = array('error' => 'Failed to rename the temporary file');
 		}
 	}
 }
