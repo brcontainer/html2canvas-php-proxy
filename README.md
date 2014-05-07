@@ -39,9 +39,11 @@ I ask you to follow me or "star" my repository to track updates
 					"onrendered": function(canvas) {
 						var img = new Image();
 						img.onload = function() {
+							img.onload = null;
 							document.body.appendChild(img);
 						};
-						img.error = function() {
+						img.onerror = function() {
+							img.onerror = null;
 							if(window.console.log) {
 								window.console.log("Not loaded image from canvas.toDataURL");
 							} else {
@@ -59,9 +61,6 @@ I ask you to follow me or "star" my repository to track updates
 	<body>
 		<p>
 			<img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;zoom=12&amp;size=800x600&amp;maptype=roadmap&amp;sensor=false">
-		</p>
-		<p>
-			<img alt="facebook image redirect" src="https://graph.facebook.com/1415773021975267/picture">
 		</p>
 	</body>
 </html>
