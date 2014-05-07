@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.5
+html2canvas-php-proxy 0.1.6
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -90,6 +90,16 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.6 - 07.05.2014 ####
+
+* Changed order of functions
+* Removed `$e` variable (unused) in `json_encode`
+* Fixed line `$response = 'Failed to rename the temporary file';` (`$response` is array)
+* Removed incompatibility with PHP old versions (before 5.1.0) in `relative2absolute`
+* Added returns "blank" in `relative2absolute` (if `scheme` invalid in `$m` parameter)
+* Added detect problem in redirects (if you have multiple redirects)
+
+
 #### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
 
 * Improved "typing" for better updates/pull-request
@@ -120,6 +130,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Added prefix in files created by html2canvas-php-proxy (0.1.4)
 * "remove_old_files function" removes only the files with prefix (0.1.4)
 
+
 #### html2canvas-php-proxy 0.1.1 - 01.12.2013 ####
 
 * Support for PHP 4.3
@@ -131,6 +142,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Remove port from `$_SERVER['HTTP_HOST']` to prevent problem in the formatting of the address
 * Add function for remove old files
 * Fixed "validate" callback param
+
 
 #### html2canvas-php-proxy 0.1.0 - 24.11.2013 ####
 
@@ -148,6 +160,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Improved validation http/https (`function isHttpUrl`)
 * Prevent waring in `rename()` (PHP 5.2 in CGI), because the waring `return false;`
 * In addition to other improvements when the script was rewritten
+
 
 #### html2canvas-php-proxy 0.0.4 - 20.11.2013 ####
 
