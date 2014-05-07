@@ -99,6 +99,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Added detect problem in redirects (if you have multiple redirects)
 * Replace `stripos` by `strpos` (php4) - version 0.1.7
 * Added comparison of "socket time limit (timeout)" and "max_execution_time" (php.ini), preventing the page goes blank - version 0.1.7
+* Fixed urls like `//website.com/path/../file.png` to `http://website.com/file.png`
 
 
 #### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
