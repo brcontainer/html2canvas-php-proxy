@@ -1,12 +1,12 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.6
+html2canvas-proxy-php 0.1.7
 Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
 */
 
-error_reporting(E_ALL|E_STRICT);//Turn off erros because the script already own uses error_get_last
+error_reporting(0);//Turn off erros because the script already own uses error_get_last
 
 //constants
 define('EOL', chr(10));
@@ -160,12 +160,15 @@ function setHeaders($nocache) {
  * @return string         return always string, if have an error, return blank string (scheme invalid)
 */
 function relative2absolute($u, $m) {
+	$ik = 0;
+
 	if(strpos($m, '//') === 0) {//http link //site.com/test
 		return 'http:' . $m;
 	}
 
 	if(preg_match('#^[a-zA-Z0-9]+[:]#', $m) !== 0) {
 		$pu = parse_url($m);
+
 		if(preg_match('/^(http|https)$/i', $pu['scheme']) === 0) {
 			return '';
 		}
@@ -193,7 +196,7 @@ function relative2absolute($u, $m) {
 	$pm = parse_url('http://1/' . $m);
 	$pm['path'] = isset($pm['path']) ? $pm['path'] : '';
 
-	$isPath = $pm['path'] !== '' && stripos(strrev($pm['path']), '/') === 0 ? true : false;
+	$isPath = $pm['path'] !== '' && strpos(strrev($pm['path']), '/') === 0 ? true : false;
 
 	if(strpos($m, '/') === 0) {
 		$pu['path'] = '';
@@ -348,7 +351,9 @@ function downloadSource($url, $toSource, $caller) {
 			if(MAX_EXEC !== 0 && (time() - INIT_EXEC) >= MAX_EXEC) {
 				return array('error' => 'Maximum execution time of ' . ((string) (MAX_EXEC + 5)) . ' seconds exceeded, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled)');
 			}
+
 			$data = fgets($fp);
+
 			if($data === false) { continue; }
 			if($isHttp === false) {
 				if(preg_match('#^HTTP[/]1[.]#i', $data) === 0) {
@@ -459,6 +464,8 @@ if(isset($_SERVER['HTTP_HOST']) === false || strlen($_SERVER['HTTP_HOST']) === 0
 	$response = array('error' => 'The Server-proxy did not send the PORT (configure PHP)');
 } else if(MAX_EXEC < 10) {
 	$response = array('error' => 'Execution time is less 15 seconds, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended time is 30 seconds or more');
+} else if(MAX_EXEC <= TIMEOUT) {
+	$response = array('error' => 'The execution time is not configured enough to TIMEOUT in SOCKET, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended that the "max_execution_time =;" be a minimum of 5 seconds longer or reduce the TIMEOUT in "define(\'TIMEOUT\', ' . TIMEOUT . ');"');
 } else if(isset($_GET['url']) === false || strlen($_GET['url']) === 0) {
 	$response = array('error' => 'No such parameter "url"');
 } else if(isHttpUrl($_GET['url']) === false) {
