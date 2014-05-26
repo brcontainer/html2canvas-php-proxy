@@ -34,7 +34,7 @@ I ask you to follow me or "star" my repository to track updates
 		(function() {
 			window.onload = function(){
 				html2canvas(document.body, {
-					"logging": true, //Enable log (use Web Console for get Errors and Warings)
+					"logging": true, //Enable log (use Web Console for get Errors and Warnings)
 					"proxy":"html2canvasproxy.php",
 					"onrendered": function(canvas) {
 						var img = new Image();
@@ -66,7 +66,7 @@ I ask you to follow me or "star" my repository to track updates
 </html>
 ```
 
-#### Using Web Cosnole ####
+#### Using Web Console ####
 
 If you have any problems with the script recommend to analyze the log using the Web Console from your browser:
 * Firefox: https://developer.mozilla.org/en-US/docs/Tools/Browser_Console
@@ -105,7 +105,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 #### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
 
 * Improved "typing" for better updates/pull-request
-* Converted variuos variables to (int)
+* Converted various variables to (int)
 * removed must-revalidate in header
 * Improved forks
 * Improved http response, If http_status<>200, return error in html2canvas
@@ -114,20 +114,20 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Fixed undefined variables
 * Fixed bug in `json_encode_string` (characters)
 * Fixed "invalid escapes" in `json_encode_string`
-* Improved perfomance in `json_encode_string`
-* Removed `utf8_encode` (unecessary) in `json_encode_string`
+* Improved performance in `json_encode_string`
+* Removed `utf8_encode` (unnecessary) in `json_encode_string`
 * Fixed bug in `relative2absolute`
 * `downloadSource` always returns array
 * Replace `error_get_last` by `get_error`
-* Added coments in functions
+* Added comments in functions
 
 
 #### html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014 ####
 
-* Added support to javascript functions basead in Objects (update to 0.1.2)
+* Added support to javascript functions based in Objects (update to 0.1.2)
 * Fixed bug in 0.1.2 (update to 0.1.3)
 * Added support to "relative paths" (function relative2absolute) (0.1.4)
-* Added "referer header" (if exists) (0.1.4)
+* Added "referrer header" (if exists) (0.1.4)
 * Added "remove charset" for mime-types (eg. text/html; charset=ut8 => text/html) (0.1.4)
 * Added prefix in files created by html2canvas-php-proxy (0.1.4)
 * "remove_old_files function" removes only the files with prefix (0.1.4)
@@ -154,13 +154,13 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Added support for detecting max_execution_time
 * Added the use of `erro_get_last()`
 * Added support for "Location:" header
-* Added support for detecting 304 HTTP, return an error waring (socket does not use/send Etags)
+* Added support for detecting 304 HTTP, return an error warning (socket does not use/send Etags)
 * Added `utf8_encode` to `json_encode` to prevent the error string becomes NULL
-* Added an error waring, if there is no the file "Content-type:" header
+* Added an error warning, if there is no the file "Content-type:" header
 * In case of HTTP 3xx response, if there is no "Location:" header, returns an error warning
 * Improved response headers from proxy (`function setHeaders`)
 * Improved validation http/https (`function isHttpUrl`)
-* Prevent waring in `rename()` (PHP 5.2 in CGI), because the waring `return false;`
+* Prevent warning in `rename()` (PHP 5.2 in CGI), because the warning `return false;`
 * In addition to other improvements when the script was rewritten
 
 
