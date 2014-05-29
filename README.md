@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.7
+html2canvas-php-proxy 0.1.8
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -68,7 +68,7 @@ I ask you to follow me or "star" my repository to track updates
 
 #### Using Web Console ####
 
-If you have any problems with the script recommend to analyze the log using the Web Console from your browser:
+If you have any problems with the script recommend to analyze the log use the Web Console from your browser:
 * Firefox: https://developer.mozilla.org/en-US/docs/Tools/Browser_Console
 * Chrome: https://developers.google.com/chrome-developer-tools/docs/console
 * InternetExplorer: http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx
@@ -89,6 +89,18 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.8 ####
+
+* Removed unused vars
+* Replace tabs by spaces (size 4)
+* Added `=== false` misses in `isset()`
+* Improved type
+* Removed `empty($maxExec)`
+* Removed unnecessary `=== true`
+* Replace `mkdir(PATH, 755)` to `mkdir(PATH, 0755)`
+* Added detect "SSL socket stream" support (If not support SSL in "Registered Stream Socket Transports" show error)
+* Removed `?>` to prevent whitespace.
+
 #### html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014 ####
 
 * Changed order of functions
@@ -100,7 +112,6 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 * Replace `stripos` by `strpos` (php4) - version 0.1.7
 * Added comparison of "socket time limit (timeout)" and "max_execution_time" (php.ini), preventing the page goes blank - version 0.1.7
 * Fixed urls like `//website.com/path/../file.png` to `http://website.com/file.png`
-
 
 #### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
 
