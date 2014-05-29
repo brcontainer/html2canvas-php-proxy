@@ -89,7 +89,7 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 ### Changelog ###
 
-Changelog move to https://github.com/brcontainer/html2canvas-php-proxy/blob/master/CHANGELOG.md
+Changelog moved to https://github.com/brcontainer/html2canvas-php-proxy/blob/master/CHANGELOG.md
 
 
 ### Next version ###
