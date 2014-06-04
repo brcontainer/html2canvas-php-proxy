@@ -9,7 +9,7 @@
 * Removed `empty($maxExec)`
 * Removed unnecessary `=== true`
 * Replace `mkdir(PATH, 755)` to `mkdir(PATH, 0755)`
-* Added detect "SSL socket stream" support (If not support SSL in "Registered Stream Socket Transports" show error)
+* Added detect "SSL socket stream" support (If the socket requires "SSL", but do not have suporter then shows an error, but if you do not need to "SSL", even if it is not supported, then the code will work without showing error.)
 * Removed `?>` to prevent whitespace.
 
 #### html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014 ####
