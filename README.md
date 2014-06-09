@@ -6,6 +6,14 @@ html2canvas-php-proxy 0.1.8
 This script allows you to use **html2canvas.js** with different servers, ports and protocols (http, https),
 preventing to occur "tainted" when exporting the `<canvas>` for image.
 
+### Others scripting language ###
+
+You do not use PHP, but need html2canvas working with proxy, see other proxies:
+
+* [html2canvas proxy in asp.net (csharp)](https://github.com/brcontainer/html2canvas-csharp-proxy)
+* [html2canvas proxy in asp classic (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
+* [html2canvas proxy in python (work any framework)](https://github.com/brcontainer/html2canvas-proxy-python)
+
 ###Problem and Solution###
 When adding an image that belongs to another domain in `<canvas>` and after that try to export the canvas
 for a new image, a security error occurs (actually occurs is a security lock), which can return the error:
@@ -99,10 +107,3 @@ The ideas here are not ready or are not public in the main script, are only sugg
 
 * Etag cache browser for use HTTP 304 (resources are reusable, avoiding unnecessary downloads)
 * Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
-
-### Others scripting language ###
-
-You do not use PHP, but need html2canvas working with proxy, see other proxies:
-
-* [html2canvas proxy in asp.net (csharp)](https://github.com/brcontainer/html2canvas-csharp-proxy)
-* [html2canvas proxy in asp classic (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
