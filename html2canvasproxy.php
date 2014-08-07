@@ -370,9 +370,15 @@ function downloadSource($url, $toSource, $caller) {
             ) . ' HTTP/1.0' . WOL . EOL
         );
 
+		if(isset($uri['user'])) {
+            $auth = base64_encode($uri['user'] . ':' . (isset($uri['pass']) ? $uri['pass'] : ''));
+            fwrite($fp, 'Authorization: Basic ' . $auth . WOL . EOL);
+		}
+
         if(isset($_SERVER['HTTP_ACCEPT']) && strlen($_SERVER['HTTP_ACCEPT']) > 0) {
             fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . WOL . EOL);
         }
+
         if(isset($_SERVER['HTTP_USER_AGENT']) && strlen($_SERVER['HTTP_USER_AGENT']) > 0) {
             fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . WOL . EOL);
         }
