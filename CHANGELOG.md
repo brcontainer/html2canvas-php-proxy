@@ -1,5 +1,9 @@
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.9 ####
+
+* Added support to "HTTP Basic access authentication"
+
 #### html2canvas-php-proxy 0.1.8 ####
 
 * Removed unused vars
@@ -28,7 +32,7 @@
 
 * Improved "typing" for better updates/pull-request
 * Converted various variables to (int)
-* removed must-revalidate in header
+* Removed must-revalidate in header
 * Improved forks
 * Improved http response, If http_status<>200, return error in html2canvas
 * Fixed bug in Facebook redirect (HTTP/1.1 302 forced.302)
