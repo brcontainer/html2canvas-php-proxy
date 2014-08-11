@@ -30,47 +30,50 @@ I ask you to follow me or "star" my repository to track updates
 
 > Note: Requires PHP 4.3.0+
 
+* [Google maps](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/google-maps.html)
+* [Test case](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/usable-example.html)
+
 ```html
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>html2canvas php proxy</title>
-		<script src="html2canvas.js"></script>
-		<script>
-		//<![CDATA[
-		(function() {
-			window.onload = function(){
-				html2canvas(document.body, {
-					"logging": true, //Enable log (use Web Console for get Errors and Warnings)
-					"proxy":"html2canvasproxy.php",
-					"onrendered": function(canvas) {
-						var img = new Image();
-						img.onload = function() {
-							img.onload = null;
-							document.body.appendChild(img);
-						};
-						img.onerror = function() {
-							img.onerror = null;
-							if(window.console.log) {
-								window.console.log("Not loaded image from canvas.toDataURL");
-							} else {
-								alert("Not loaded image from canvas.toDataURL");
-							}
-						};
-						img.src = canvas.toDataURL("image/png");
-					}
-				});
-			};
-		})();
-		//]]>
-		</script>
-	</head>
-	<body>
-		<p>
-			<img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;zoom=12&amp;size=800x600&amp;maptype=roadmap&amp;sensor=false">
-		</p>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <title>html2canvas php proxy</title>
+        <script src="html2canvas.js"></script>
+        <script>
+        //<![CDATA[
+        (function() {
+            window.onload = function(){
+                html2canvas(document.body, {
+                    "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                    "proxy":"html2canvasproxy.php",
+                    "onrendered": function(canvas) {
+                        var img = new Image();
+                        img.onload = function() {
+                            img.onload = null;
+                            document.body.appendChild(img);
+                        };
+                        img.onerror = function() {
+                            img.onerror = null;
+                            if(window.console.log) {
+                                window.console.log("Not loaded image from canvas.toDataURL");
+                            } else {
+                                alert("Not loaded image from canvas.toDataURL");
+                            }
+                        };
+                        img.src = canvas.toDataURL("image/png");
+                    }
+                });
+            };
+        })();
+        //]]>
+        </script>
+    </head>
+    <body>
+        <p>
+            <img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;zoom=12&amp;size=800x600&amp;maptype=roadmap&amp;sensor=false">
+        </p>
+    </body>
 </html>
 ```
 
