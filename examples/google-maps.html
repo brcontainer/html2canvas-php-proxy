@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Google Maps and html2canvas</title>
+    <style type="text/css">
+    #map_canvas{
+        height: 400px;
+        width: 600px;
+        border: 1px #c0c0c0 solid;
+    }
+    </style>
+
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script type="text/javascript">
+    var map = null;
+     function initialize() {
+        var parametreCarteVillage = {
+            zoom                        : 9,
+            center                      : new google.maps.LatLng(38.959409, -87.289124),
+            disableDoubleClickZoom      : false,
+            draggable                   : true,
+            scrollwheel                 : true,
+            panControl                  : false,
+            disableDefaultUI            : true,
+            mapTypeControl              : true,
+            keyboardShortcuts           : true,
+            mapTypeId                   : google.maps.MapTypeId.ROADMAP
+        }
+        map = new google.maps.Map(document.getElementById('map_canvas'), parametreCarteVillage);
+
+
+      var marker = new google.maps.Marker({
+          position:new google.maps.LatLng(38.959409,-87.289124),
+          map: map,
+          title: 'Title!'
+      });
+    }
+
+    window.onload = function () {
+        initialize();
+
+        function convert(target) {
+            html2canvas(target, {
+                "proxy": "../html2canvasproxy.php",
+                "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                "onrendered": function(canvas) {
+                    var img = new Image();
+                        img.onload = function () {
+                            img.onload = null;
+                            document.getElementById("output").appendChild(img);
+                        };
+                        img.src = canvas.toDataURL("image/png");
+                }
+            });
+        }
+
+        document.getElementById("save1").onclick = function () {
+            convert(document.getElementById("map_canvas"));
+        };
+
+        document.getElementById("save2").onclick = function () {
+            convert(document.getElementById("container"));
+        };
+    };
+    </script>
+</head>
+    <body>
+        <h1>Google Maps with html2canvas</h1>
+        <p>Tested on Chrome and Firefox</p>
+
+        <div id="container">
+            <h1>Maps example:</h1>
+            <div id="map_canvas"></div>
+            <div>
+                <button id="save1">Save #map_canvas</button>
+                <button id="save2">Save #container</button>
+            </div>
+        </div>
+
+        <div id="output">
+            <h1>Output results:</h1>
+        </div>
+    </body>
+</html>
