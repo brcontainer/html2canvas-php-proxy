@@ -36,6 +36,8 @@ I ask you to follow me or "star" my repository to track updates
 
 In some cases you may want to use this [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php) on a specific server, but the "html2canvas.js" and another server, this would cause problems in your project with the security causing failures in execution. In order to use security just set in the [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php):
 
+(See details: https://github.com/brcontainer/html2canvas-php-proxy/issues/9)
+
 Enable cross-domain in proxy server:
 
 `define('CROSS_DOMAIN', 1);`
