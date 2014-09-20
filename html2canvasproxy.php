@@ -1,17 +1,13 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.9
+html2canvas-proxy-php 0.1.10
 Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
 
 Released under the MIT license
 */
 
-error_reporting(0);//Turn off errors because the script already own uses "error_get_last"
-
-//constants
-define('EOL', chr(10));
-define('WOL', chr(13));
-define('GMDATECACHE', gmdate('D, d M Y H:i:s'));
+//Turn off errors because the script already own uses "error_get_last"
+error_reporting(0);
 
 //setup
 define('JSLOG', 'console.log'); //Configure alternative function log, eg. console.log, alert, custom_function
@@ -19,6 +15,12 @@ define('PATH', 'images');//relative folder where the images are saved
 define('CCACHE', 60 * 5 * 1000);//Limit access-control and cache, define 0/false/null/-1 to not use "http header cache"
 define('TIMEOUT', 30);//Timeout from load Socket
 define('MAX_LOOP', 10);//Configure loop limit for redirect (location header)
+define('CROSS_DOMAIN', 0);//Enable use of "data URI scheme"
+
+//constants
+define('EOL', chr(10));
+define('WOL', chr(13));
+define('GMDATECACHE', gmdate('D, d M Y H:i:s'));
 
 /*
 If execution has reached the time limit prevents page goes blank (off errors)
@@ -44,6 +46,30 @@ header('Content-Type: application/javascript');
 $param_callback = JSLOG;//force use alternative log error
 $tmp = null;//tmp var usage
 $response = array();
+
+/**
+ * For show ASCII documents with "data uri scheme"
+ * @param string $s    to encode
+ * @return string      always return string
+ */
+function ascii2inline($str) {
+    $trans = array();
+    $trans[EOL] = '%0A';
+    $trans[WOL] = '%0D';
+    $trans[' '] = '%20';
+    $trans['"'] = '%22';
+    $trans['#'] = '%23';
+    $trans['&'] = '%26';
+    $trans['\/'] = '%2F';
+    $trans['\\'] = '%5C';
+    $trans[':'] = '%3A';
+    $trans['?'] = '%3F';
+    $trans[chr(0)] = '%00';
+    $trans[chr(8)] = '';
+    $trans[chr(9)] = '%09';
+
+    return strtr($str, $trans);
+}
 
 /**
  * Detect SSL stream transport
@@ -123,7 +149,7 @@ function get_error() {
  * @param string $s    to encode
  * @return string      always return string
  */
-function json_encode_string($s) {
+function json_encode_string($s, $onlyEncode=false) {
     $vetor = array();
     $vetor[0]  = '\\0';
     $vetor[8]  = '\\b';
@@ -157,7 +183,11 @@ function json_encode_string($s) {
         $enc .= $tmp;
     }
 
-    return '"' . $enc . '"';
+    if ($onlyEncode === true) {
+        return $enc;
+    } else {
+        return '"' . $enc . '"';
+    }
 }
 
 /**
@@ -393,6 +423,7 @@ function downloadSource($url, $toSource, $caller) {
         $isRedirect = true;
         $isBody = false;
         $isHttp = false;
+        $encode = null;
         $mime = null;
         $data = '';
 
@@ -403,7 +434,10 @@ function downloadSource($url, $toSource, $caller) {
 
             $data = fgets($fp);
 
-            if($data === false) { continue; }
+            if($data === false) {
+                continue;
+            }
+
             if($isHttp === false) {
                 if(preg_match('#^HTTP[/]1[.]#i', $data) === 0) {
                     fclose($fp);//Close connection
@@ -421,20 +455,25 @@ function downloadSource($url, $toSource, $caller) {
                     return array('error' => 'Request returned HTTP_304, this status code is incorrect because the html2canvas not send Etag');
                 } else {
                     $isRedirect = preg_match('#^(301|302|303|307|308)$#', $tmp) !== 0;
+
                     if($isRedirect === false && $tmp !== '200') {
                         fclose($fp);
                         $data = '';
                         return array('error' => 'Request returned HTTP_' . $tmp);
                     }
+
                     $isHttp = true;
+
                     continue;
                 }
             }
+
             if($isBody === false) {
                 if(preg_match('#^location[:]#i', $data) !== 0) {//200 force 302
                     fclose($fp);//Close connection
                     
                     $data = trim(preg_replace('#^location[:]#i', '', $data));
+
                     if($data === '') {
                         return array('error' => '"Location:" header is blank');
                     }
@@ -455,10 +494,17 @@ function downloadSource($url, $toSource, $caller) {
                     $data = '';
                     return array('error' => 'source is blank (Content-length: 0)');
                 } else if(preg_match('#^content[-]type[:]#i', $data) !== 0) {
+                    $data = strtolower($data);
+
+                    if (preg_match('#[;](\s|)+charset[=]#', $data) !== 0) {
+                        $tmp2 = preg_split('#[;](\s|)+charset[=]#', $data);
+                        $encode = isset($tmp2[1]) ? trim($tmp2[1]) : null;
+                    }
+
                     $mime = trim(
                         preg_replace('/[;]([\\s\\S]|)+$/', '', 
                             str_replace('content-type:', '',
-                                str_replace('/x-', '/', strtolower($data))
+                                str_replace('/x-', '/', $data)
                             )
                         )
                     );
@@ -466,7 +512,9 @@ function downloadSource($url, $toSource, $caller) {
                     if(in_array($mime, array(
                         'image/bmp', 'image/windows-bmp', 'image/ms-bmp',
                         'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
-                        'text/html', 'application/xhtml', 'application/xhtml+xml'
+                        'text/html', 'application/xhtml', 'application/xhtml+xml',
+                        'image/svg+xml', //SVG image
+                        'image/svg-xml' //Old servers (bug)
                     )) === false) {
                         fclose($fp);
                         $data = '';
@@ -491,14 +539,18 @@ function downloadSource($url, $toSource, $caller) {
         }
 
         fclose($fp);
+
         $data = '';
+
         if($isBody === false) {
             return array('error' => 'Content body is empty');
         } else if($mime === null) {
             return array('error' => 'Not set the mimetype from "' . $url . '"');
         }
+
         return array(
-            'mime' => $mime
+            'mime' => $mime,
+            'encode' => $encode
         );
     }
 }
@@ -551,7 +603,7 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
     } else if(filesize($tmp['location']) < 1) {
         $response = array('error' => 'Request was downloaded, but there was some problem and now the file is empty, try again');
     } else {
-        $response['mime'] = str_replace(array('windows-bmp', 'ms-bmp'), 'bmp', //mimetype bitmap to bmp extension
+        $extension = str_replace(array('windows-bmp', 'ms-bmp'), 'bmp', //mimetype bitmap to bmp extension
             str_replace('jpeg', 'jpg', //jpeg to jpg extesion
                 str_replace('xhtml+xml', 'xhtml',//fix mime to xhtml
                     str_replace(array('image/', 'text/', 'application/'), '',
@@ -561,31 +613,60 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
             )
         );
 
-        $locationFile = preg_replace('#[.][0-9_]+$#', '.' . $response['mime'], $tmp['location']);
+        $locationFile = preg_replace('#[.][0-9_]+$#', '.' . $extension, $tmp['location']);
         if(file_exists($locationFile)) {
             unlink($locationFile);
         }
 
         if(rename($tmp['location'], $locationFile)) {
-            //success
-            $tmp = $response = null;
-
             //set cache
             setHeaders(false);
 
             remove_old_files();
 
-            echo $param_callback, '(',
-                json_encode_string(
-                    ($http_port === 443 ? 'https://' : 'http://') .
-                    preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
-                    ($http_port === 80 || $http_port === 443 ? '' : (
-                        ':' . $_SERVER['SERVER_PORT']
-                    )) .
-                    dirname($_SERVER['SCRIPT_NAME']). '/' .
-                    $locationFile
-                ),
-            ');';
+            if (CROSS_DOMAIN === 1) {
+                $mime = json_encode_string($response['mime'], true);
+                $mime = $response['mime'];
+                if ($response['encode'] !== null) {
+                    $mime .= ';charset=' . json_encode_string($response['encode'], true);
+                }
+
+                $tmp = $response = null;
+
+                if (
+                    strpos($response['mime'], 'image/svg') !== 0 &&
+                    strpos($response['mime'], 'image/') === 0
+                ) {
+                    echo $param_callback, '("data:', $mime, ';base64,',
+                        base64_encode(
+                            file_get_contents($locationFile)
+                        ),
+                    '");';
+                } else {
+                    echo $param_callback, '("data:', $mime, ',',
+                        ascii2inline(file_get_contents($locationFile)),
+                    '");';
+                }
+            } else {
+                $tmp = $response = null;
+
+                $dir_name = dirname($_SERVER['SCRIPT_NAME']);
+                if ($dir_name === '\/' || $dir_name === '\\') {
+                    $dir_name = '';
+                }
+
+                echo $param_callback, '(',
+                    json_encode_string(
+                        ($http_port === 443 ? 'https://' : 'http://') .
+                        preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
+                        ($http_port === 80 || $http_port === 443 ? '' : (
+                            ':' . $_SERVER['SERVER_PORT']
+                        )) .
+                        $dir_name. '/' .
+                        $locationFile
+                    ),
+                ');';
+            }
             exit;
         } else {
             $response = array('error' => 'Failed to rename the temporary file');
