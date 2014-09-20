@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.9
+html2canvas-php-proxy 0.1.10
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -25,6 +25,24 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 ### Follow ###
 
 I ask you to follow me or "star" my repository to track updates
+
+### Run script in Cross-domain (data URI scheme) ###
+
+> Note: Enable cross-domain in proxy server can consume more memory, but can be faster in execution it performs only one request at the proxy server.
+
+> Note: If the file html2canvasproxy.php is in the same domain that your project, you do not need to enable this option.
+
+> Note: Disable the "cross-domain" does not mean you will not be able to capture images from different servers, in other words, the "cross-domain" here refers to "html2canvas.js" (not necessarily the javascript file, but the place where runs) and the "html2canvas.php" are in different domains, the "cross-domain" here refers domain. 
+
+In some cases you may want to use this [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php) on a specific server, but the "html2canvas.js" and another server, this would cause problems in your project with the security causing failures in execution. In order to use security just set in the [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php):
+
+Enable cross-domain in proxy server:
+
+`define('CROSS_DOMAIN', 1);`
+
+Disable cross-domain in proxy server:
+
+`define('CROSS_DOMAIN', 0);`
 
 ### Usage ###
 
