@@ -634,8 +634,8 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
                 $tmp = $response = null;
 
                 if (
-                    strpos($response['mime'], 'image/svg') !== 0 &&
-                    strpos($response['mime'], 'image/') === 0
+                    strpos($mime, 'image/svg') !== 0 &&
+                    strpos($mime, 'image/') === 0
                 ) {
                     echo $param_callback, '("data:', $mime, ';base64,',
                         base64_encode(
