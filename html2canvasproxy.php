@@ -1,10 +1,10 @@
 <?php
 /*
-html2canvas-proxy-php 0.1.10
-Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
-
-Released under the MIT license
-*/
+ * html2canvas-proxy-php 0.1.11
+ * Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
+ * 
+ * Released under the MIT license
+ */
 
 //Turn off errors because the script already own uses "error_get_last"
 error_reporting(0);
@@ -52,7 +52,7 @@ $response = array();
  * @param string $s    to encode
  * @return string      always return string
  */
-function ascii2inline($str) {
+function asciiToInline($str) {
     $trans = array();
     $trans[EOL] = '%0A';
     $trans[WOL] = '%0D';
@@ -149,7 +149,7 @@ function get_error() {
  * @param string $s    to encode
  * @return string      always return string
  */
-function json_encode_string($s, $onlyEncode=false) {
+function JsonEncodeString($s, $onlyEncode=false) {
     $vetor = array();
     $vetor[0]  = '\\0';
     $vetor[8]  = '\\b';
@@ -223,7 +223,7 @@ function setHeaders($nocache) {
  * @param string $m       set relative url
  * @return string         return always string, if have an error, return blank string (scheme invalid)
 */
-function relative2absolute($u, $m) {
+function relativeToAbsolute($u, $m) {
     if(strpos($m, '//') === 0) {//http link //site.com/test
         return 'http:' . $m;
     }
@@ -248,7 +248,7 @@ function relative2absolute($u, $m) {
             $m .= '#' . $pu['fragment'];
         }
 
-        return relative2absolute($pu['scheme'] . '://' . $pu['host'], $m);
+        return relativeToAbsolute($pu['scheme'] . '://' . $pu['host'], $m);
     }
 
     if(preg_match('/^[?#]/', $m) !== 0) {
@@ -479,7 +479,7 @@ function downloadSource($url, $toSource, $caller) {
                     }
 
                     $nextUri = $data;
-                    $data = relative2absolute($url, $data);
+                    $data = relativeToAbsolute($url, $data);
 
                     if($data === '') {
                         return array('error' => 'Invalid scheme in url (' . $nextUri . ')');
@@ -603,15 +603,11 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
     } else if(filesize($tmp['location']) < 1) {
         $response = array('error' => 'Request was downloaded, but there was some problem and now the file is empty, try again');
     } else {
-        $extension = str_replace(array('windows-bmp', 'ms-bmp'), 'bmp', //mimetype bitmap to bmp extension
-            str_replace('jpeg', 'jpg', //jpeg to jpg extesion
-                str_replace('xhtml+xml', 'xhtml',//fix mime to xhtml
-                    str_replace(array('image/', 'text/', 'application/'), '',
-                        $response['mime']
-                    )
-                )
-            )
-        );
+        $extension = str_replace(array('image/', 'text/', 'application/'), '', $response['mime']);
+        $extension = str_replace(array('windows-bmp', 'ms-bmp'), 'bmp', $extension);
+        $extension = str_replace(array('svg+xml', 'svg-xml'), 'svg', $extension);
+        $extension = str_replace('xhtml+xml', 'xhtml', $extension);
+        $extension = str_replace('jpeg', 'jpg', $extension);
 
         $locationFile = preg_replace('#[.][0-9_]+$#', '.' . $extension, $tmp['location']);
         if(file_exists($locationFile)) {
@@ -625,18 +621,15 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
             remove_old_files();
 
             if (CROSS_DOMAIN === 1) {
-                $mime = json_encode_string($response['mime'], true);
+                $mime = JsonEncodeString($response['mime'], true);
                 $mime = $response['mime'];
                 if ($response['encode'] !== null) {
-                    $mime .= ';charset=' . json_encode_string($response['encode'], true);
+                    $mime .= ';charset=' . JsonEncodeString($response['encode'], true);
                 }
 
                 $tmp = $response = null;
 
-                if (
-                    strpos($mime, 'image/svg') !== 0 &&
-                    strpos($mime, 'image/') === 0
-                ) {
+                if (strpos($mime, 'image/svg') !== 0 && strpos($mime, 'image/') === 0) {
                     echo $param_callback, '("data:', $mime, ';base64,',
                         base64_encode(
                             file_get_contents($locationFile)
@@ -644,7 +637,9 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
                     '");';
                 } else {
                     echo $param_callback, '("data:', $mime, ',',
-                        ascii2inline(file_get_contents($locationFile)),
+                        asciiToInline(
+                            file_get_contents($locationFile)
+                        ),
                     '");';
                 }
             } else {
@@ -656,7 +651,7 @@ if(is_array($response) && isset($response['mime']) && strlen($response['mime']) 
                 }
 
                 echo $param_callback, '(',
-                    json_encode_string(
+                    JsonEncodeString(
                         ($http_port === 443 ? 'https://' : 'http://') .
                         preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
                         ($http_port === 80 || $http_port === 443 ? '' : (
@@ -685,7 +680,7 @@ setHeaders(true);//no-cache
 remove_old_files();
 
 echo $param_callback, '(',
-    json_encode_string(
+    JsonEncodeString(
         'error: html2canvas-proxy-php: ' . $response['error']
     ),
 ');';
