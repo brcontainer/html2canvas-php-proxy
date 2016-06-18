@@ -1,5 +1,9 @@
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.12 ####
+
+ * Replace 0755 to 0666 permission for backup folder (`images/`)
+
 #### html2canvas-php-proxy 0.1.11 ####
 
  * Now using camelCase in functions
