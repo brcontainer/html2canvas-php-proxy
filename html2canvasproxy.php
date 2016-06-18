@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 0.1.11
+ * html2canvas-php-proxy 0.1.12
  * Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
  * 
  * Released under the MIT license
@@ -12,6 +12,7 @@ error_reporting(0);
 //setup
 define('JSLOG', 'console.log'); //Configure alternative function log, eg. console.log, alert, custom_function
 define('PATH', 'images');//relative folder where the images are saved
+define('PATH_PERMISSION', 0666);//use 644 or 666 for remove execution for prevent sploits
 define('CCACHE', 60 * 5 * 1000);//Limit access-control and cache, define 0/false/null/-1 to not use "http header cache"
 define('TIMEOUT', 30);//Timeout from load Socket
 define('MAX_LOOP', 10);//Configure loop limit for redirect (location header)
@@ -320,7 +321,7 @@ function isHttpUrl($u) {
 */
 function createFolder() {
     if(file_exists(PATH) === false || is_dir(PATH) === false) {
-        return mkdir(PATH, 0755);
+        return mkdir(PATH, PATH_PERMISSION);
     }
     return true;
 }
