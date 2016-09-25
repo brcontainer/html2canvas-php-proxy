@@ -9,7 +9,7 @@
             window.onload = function(){
                 html2canvas(document.body, {
                     "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-                    "proxy":"html2canvasproxy.php",
+                    "proxy": "../html2canvasproxy.php",
                     "onrendered": function(canvas) {
                         var img = new Image();
                         img.onload = function() {

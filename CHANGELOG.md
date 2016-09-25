@@ -1,5 +1,12 @@
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.1.13 ####
+
+ * Added support to CURL for improve usage in PHP 5.6
+ * Organized functions
+
+### Changelog ###
+
 #### html2canvas-php-proxy 0.1.12 ####
 
  * Replace 0755 to 0666 permission for backup folder (`images/`)

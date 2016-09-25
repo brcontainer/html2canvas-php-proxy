@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.12
+html2canvas-php-proxy 0.1.13
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -34,7 +34,7 @@ I ask you to follow me or "star" my repository to track updates
 
 > Note: If the file html2canvasproxy.php is in the same domain that your project, you do not need to enable this option.
 
-> Note: Disable the "cross-domain" does not mean you will not be able to capture images from different servers, in other words, the "cross-domain" here refers to "html2canvas.js" (not necessarily the javascript file, but the place where runs) and the "html2canvas.php" are in different domains, the "cross-domain" here refers domain. 
+> Note: Disable the "cross-domain" does not mean you will not be able to capture images from different servers, in other words, the "cross-domain" here refers to "html2canvas.js" (not necessarily the javascript file, but the place where runs) and the "html2canvas.php" are in different domains, the "cross-domain" here refers domain.
 
 In some cases you may want to use this [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php) on a specific server, but the "html2canvas.js" and another server, this would cause problems in your project with the security causing failures in execution. In order to use security just set in the [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php):
 
