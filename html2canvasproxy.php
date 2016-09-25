@@ -1,7 +1,8 @@
 <?php
 /*
  * html2canvas-php-proxy 0.1.13
- * Copyright (c) 2014 Guilherme Nascimento (brcontainer@yahoo.com.br)
+ *
+ * Copyright (c) 2016 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
  * Released under the MIT license
  */
