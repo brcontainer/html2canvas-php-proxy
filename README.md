@@ -1,4 +1,4 @@
-html2canvas-php-proxy 0.1.13
+html2canvas-php-proxy 0.1.14
 =====================
 
 #### PHP Proxy html2canvas ####
@@ -45,6 +45,20 @@ Enable cross-domain in proxy server:
 Disable cross-domain in proxy server:
 
 `define('CROSS_DOMAIN', 0);`
+
+### Setup ###
+
+Definition | Description
+--- | ---
+`define('JSLOG', 'console.log');`    | Configure alternative function log, eg. `console.log`, `alert`, `custom_function`
+`define('PATH', 'images/saved');`    | Folder where the images are saved
+`define('PATH_PERMISSION', 0666);`   | Set forlder permission (use 644 or 666 for remove execution for prevent sploits)
+`define('CCACHE', 60 * 5 * 1000);`   | Limit access-control and cache in seconds, define 0/false/null/-1 to not use "http header cache"
+`define('TIMEOUT', 30);`             | Timeout from load Socket
+`define('MAX_LOOP', 10);`            | Configure loop limit for redirects (location header)
+`define('CROSS_DOMAIN', false);`     | Enable use of "data URI scheme"
+`define('SSL_VERIFY_PEER', false);`  | Enable or disable SSL checking
+`define('PREFER_CURL', true);`       | Prefer curl if avaliable or disable
 
 ### Usage ###
 
