@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>html2canvas 0.5 with PHP proxy</title>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js
+
+"></script>        <script>
+        //<![CDATA[
+        (function() {
+            window.onload = function(){
+                html2canvas(document.body, {
+                    "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                    "proxy": "../html2canvasproxy.php"
+                }).then(function(canvas) {
+                    var img = new Image();
+
+                    img.onload = function() {
+                        img.onload = null;
+                        document.body.appendChild(img);
+                    };
+
+                    img.onerror = function() {
+                        img.onerror = null;
+                        if(window.console.log) {
+                            window.console.log("Not loaded image from canvas.toDataURL");
+                        } else {
+                            alert("Not loaded image from canvas.toDataURL");
+                        }
+                    };
+
+                    img.src = canvas.toDataURL("image/png");
+                });
+            };
+        })();
+        //]]>
+        </script>
+    </head>
+    <body>
+        <h1>html2canvas 0.5 with PHP proxy</h1>
+
+        <p>
+            From googleapis.com: <br>
+            <img alt="google maps static" src="http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;zoom=12&amp;size=800x600&amp;maptype=roadmap&amp;sensor=false">
+        </p>
+        <p>
+            From githubusercontent.com: <br>
+            <img alt="google maps static" src="https://avatars1.githubusercontent.com/u/4368952?v=2&amp;s=40">
+        </p>
+        <p>
+            From facebook.com (with http redirect): <br>
+            <img alt="facebook image redirect" src="https://graph.facebook.com/366239146811715/picture">
+        </p>
+    </body>
+</html>

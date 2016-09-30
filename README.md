@@ -1,5 +1,5 @@
-html2canvas-php-proxy 0.1.14
-=====================
+html2canvas-php-proxy 0.2.0
+===========================
 
 #### PHP Proxy html2canvas ####
 
@@ -50,15 +50,15 @@ Disable cross-domain in proxy server:
 
 Definition | Description
 --- | ---
-`define('JSLOG', 'console.log');`    | Configure alternative function log, eg. `console.log`, `alert`, `custom_function`
+`define('JSLOG', 'console.log');`    | (Removed in 0.2.0) Configure alternative function log, eg. `console.log`, `alert`, `custom_function`
 `define('PATH', 'images/saved');`    | Folder where the images are saved
 `define('PATH_PERMISSION', 0666);`   | Set forlder permission (use 644 or 666 for remove execution for prevent sploits)
 `define('CCACHE', 60 * 5 * 1000);`   | Limit access-control and cache in seconds, define 0/false/null/-1 to not use "http header cache"
 `define('TIMEOUT', 30);`             | Timeout from load Socket
 `define('MAX_LOOP', 10);`            | Configure loop limit for redirects (location header)
 `define('CROSS_DOMAIN', false);`     | Enable use of "data URI scheme"
-`define('SSL_VERIFY_PEER', false);`  | Enable or disable SSL checking
 `define('PREFER_CURL', true);`       | Prefer curl if avaliable or disable
+`define('SSL_VERIFY_PEER', false);`  | Set false for disable SSL checking or true for enable (require config PHP.INI with `curl.cainfo=/path/to/cacert.pem`). You can set path manualy like this: `define('SSL_VERIFY_PEER', '/path/to/cacert.pem');`
 
 ### Usage ###
 

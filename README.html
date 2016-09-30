@@ -1014,7 +1014,7 @@ body .markdown-body
     page-break-after: avoid;
   }
 }
-</style><title>README</title></head><body><article class="markdown-body"><h1 id="html2canvas-php-proxy-0114"><a name="user-content-html2canvas-php-proxy-0114" href="#html2canvas-php-proxy-0114" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.14</h1>
+</style><title>README</title></head><body><article class="markdown-body"><h1 id="html2canvas-php-proxy-020"><a name="user-content-html2canvas-php-proxy-020" href="#html2canvas-php-proxy-020" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.2.0</h1>
 <h4 id="php-proxy-html2canvas"><a name="user-content-php-proxy-html2canvas" href="#php-proxy-html2canvas" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>PHP Proxy html2canvas</h4>
 <p>This script allows you to use <strong>html2canvas.js</strong> with different servers, ports and protocols (http, https),<br />
 preventing to occur &ldquo;tainted&rdquo; when exporting the <code>&lt;canvas&gt;</code> for image.</p>
@@ -1057,10 +1057,10 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 <tbody>
 <tr>
 <td><code>define('JSLOG', 'console.log');</code></td>
-<td>Configure alternative function log, eg. <code>console.log</code>, <code>alert</code>, <code>custom_function</code></td>
+<td>(Removed in 0.2.0) Configure alternative function log, eg. <code>console.log</code>, <code>alert</code>, <code>custom_function</code></td>
 </tr>
 <tr>
-<td><code>define('PATH', 'images');</code></td>
+<td><code>define('PATH', 'images/saved');</code></td>
 <td>Folder where the images are saved</td>
 </tr>
 <tr>
@@ -1069,7 +1069,7 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 </tr>
 <tr>
 <td><code>define('CCACHE', 60 * 5 * 1000);</code></td>
-<td>Limit access-control and cache, define 0/false/null/-1 to not use &ldquo;http header cache&rdquo;</td>
+<td>Limit access-control and cache in seconds, define 0/false/null/-1 to not use &ldquo;http header cache&rdquo;</td>
 </tr>
 <tr>
 <td><code>define('TIMEOUT', 30);</code></td>
@@ -1084,12 +1084,12 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 <td>Enable use of &ldquo;data URI scheme&rdquo;</td>
 </tr>
 <tr>
-<td><code>define('SSL_VERIFY_PEER', false);</code></td>
-<td>Enable or disable SSL checking</td>
-</tr>
-<tr>
 <td><code>define('PREFER_CURL', true);</code></td>
 <td>Prefer curl if avaliable or disable</td>
+</tr>
+<tr>
+<td><code>define('SSL_VERIFY_PEER', false);</code></td>
+<td>Set false for disable SSL checking or true for enable (require config PHP.INI with <code>curl.cainfo=/path/to/cacert.pem</code>). You can set path manualy like this: <code>define('SSL_VERIFY_PEER', '/path/to/cacert.pem');</code></td>
 </tr>
 </tbody>
 </table>

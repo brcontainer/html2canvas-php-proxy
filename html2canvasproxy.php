@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 0.1.14
+ * html2canvas-php-proxy 0.2.0
  *
  * Copyright (c) 2016 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -11,15 +11,21 @@
 ini_set('display_errors', 'Off');
 
 //setup
-define('JSLOG', 'console.log');   //Configure alternative function log, eg. console.log, alert, custom_function
 define('PATH', 'images');         //relative folder where the images are saved
 define('PATH_PERMISSION', 0666);  //use 644 or 666 for remove execution for prevent sploits
 define('CCACHE', 60 * 5 * 1000);  //Limit access-control and cache, define 0/false/null/-1 to not use "http header cache"
 define('TIMEOUT', 30);            //Timeout from load Socket
 define('MAX_LOOP', 10);           //Configure loop limit for redirects (location header)
 define('CROSS_DOMAIN', false);    //Enable use of "data URI scheme"
-define('SSL_VERIFY_PEER', false); //Enable or disable SSL checking
 define('PREFER_CURL', true);      //Enable curl if avaliable or disable
+
+/*
+ * Set false for disable SSL check
+ * Set true for enable SSL check, require config `curl.cainfo=/path/to/cacert.pem` in php.ini
+ * Set path (string) if need config CAINFO manualy like this define('SSL_VERIFY_PEER', '/path/to/cacert.pem');
+ */
+
+define('SSL_VERIFY_PEER', false);
 
 //constants
 define('EOL', chr(10));
@@ -38,10 +44,6 @@ define('SECPREFIX', 'h2c_');
 
 $http_port = 0;
 
-//set mime-type
-header('Content-Type: application/javascript');
-
-$param_callback = JSLOG;//force use alternative log error
 $tmp = null;//tmp var usage
 $response = array();
 
@@ -213,7 +215,7 @@ function JsonEncodeString($s, $onlyEncode=false)
         } else {
             if (isset($vetor[$c])) {
                 $tmp = $vetor[$c];
-            } else if (($c > 31) === false) {
+            } elseif (($c > 31) === false) {
                 $d = '000' . dechex($c);
                 $tmp = '\\u' . substr($d, strlen($d) - 4);
             }
@@ -414,12 +416,27 @@ function curlDownloadSource($url, $toSource)
 
     $ch = curl_init();
 
+    if (SSL_VERIFY_PEER === true) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    } elseif (is_string(SSL_VERIFY_PEER)) {
+        if (is_file(SSL_VERIFY_PEER)) {
+            curl_close($ch);
+            return array('error' => 'Not found certificate: ' . $SSL_VERIFY_PEER);
+        }
+
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_CAINFO, SSL_VERIFY_PEER);
+    } else {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    }
+
+    curl_setopt($ch, CURLOPT_TIMEOUT, TIMEOUT);
     curl_setopt($ch, CURLOPT_URL, $currentUrl);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, MAX_LOOP);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, SSL_VERIFY_PEER);
 
     if (isset($uri['user'])) {
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
@@ -609,11 +626,11 @@ function downloadSource($url, $toSource, $caller)
                     }
 
                     return downloadSource($data, $toSource, $caller);
-                } else if (preg_match('#^content[-]length[:]( 0|0)$#i', $data) !== 0) {
+                } elseif (preg_match('#^content[-]length[:]( 0|0)$#i', $data) !== 0) {
                     fclose($fp);
                     $data = '';
                     return array('error' => 'source is blank (Content-length: 0)');
-                } else if (preg_match('#^content[-]type[:]#i', $data) !== 0) {
+                } elseif (preg_match('#^content[-]type[:]#i', $data) !== 0) {
                     $response = checkContentType($data);
 
                     if (isset($response['error'])) {
@@ -623,15 +640,15 @@ function downloadSource($url, $toSource, $caller)
 
                     $encode = $response['encode'];
                     $mime = $response['mime'];
-                } else if ($isBody === false && trim($data) === '') {
+                } elseif ($isBody === false && trim($data) === '') {
                     $isBody = true;
                     continue;
                 }
-            } else if ($isRedirect === true) {
+            } elseif ($isRedirect === true) {
                 fclose($fp);
                 $data = '';
                 return array('error' => 'The response should be a redirect "' . $url . '", but did not inform which header "Localtion:"');
-            } else if ($mime === null) {
+            } elseif ($mime === null) {
                 fclose($fp);
                 $data = '';
                 return array('error' => 'Not set the mimetype from "' . $url . '"');
@@ -647,7 +664,7 @@ function downloadSource($url, $toSource, $caller)
 
         if ($isBody === false) {
             return array('error' => 'Content body is empty');
-        } else if ($mime === null) {
+        } elseif ($mime === null) {
             return array('error' => 'Not set the mimetype from "' . $url . '"');
         }
 
@@ -658,26 +675,21 @@ function downloadSource($url, $toSource, $caller)
     }
 }
 
-if (false === empty($_GET['callback'])) {
-    $param_callback = $_GET['callback'];
-}
+define('JSONP_CALLBACK', empty($_GET['callback']) ? false : $_GET['callback']);
 
 if (empty($_SERVER['HTTP_HOST'])) {
     $response = array('error' => 'The client did not send the Host header');
-} else if (isset($_SERVER['SERVER_PORT']) === false) {
+} elseif (isset($_SERVER['SERVER_PORT']) === false) {
     $response = array('error' => 'The Server-proxy did not send the PORT (configure PHP)');
-} else if (MAX_EXEC < 10) {
+} elseif (MAX_EXEC < 10) {
     $response = array('error' => 'Execution time is less 15 seconds, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended time is 30 seconds or more');
-} else if (MAX_EXEC <= TIMEOUT) {
+} elseif (MAX_EXEC <= TIMEOUT) {
     $response = array('error' => 'The execution time is not configured enough to TIMEOUT in SOCKET, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended that the "max_execution_time =;" be a minimum of 5 seconds longer or reduce the TIMEOUT in "define(\'TIMEOUT\', ' . TIMEOUT . ');"');
-} else if (empty($_GET['url'])) {
+} elseif (empty($_GET['url'])) {
     $response = array('error' => 'No such parameter "url"');
-} else if (isHttpUrl($_GET['url']) === false) {
+} elseif (isHttpUrl($_GET['url']) === false) {
     $response = array('error' => 'Only http scheme and https scheme are allowed');
-} else if (preg_match('#[^A-Za-z0-9_[.]\\[\\]]#', $param_callback) !== 0) {
-    $response = array('error' => 'Parameter "callback" contains invalid characters');
-    $param_callback = JSLOG;
-} else if (createFolder() === false) {
+} elseif (createFolder() === false) {
     $err = getError();
     $response = array('error' => 'Can not create directory'. (
         $err !== null && empty($err['message']) ? '' : (': ' . $err['message'])
@@ -703,12 +715,15 @@ if (empty($_SERVER['HTTP_HOST'])) {
     }
 }
 
+//set mime-type
+header('Content-Type: application/javascript');
+
 if (is_array($response) && false === empty($response['mime'])) {
     clearstatcache();
 
     if (false === file_exists($tmp['location'])) {
         $response = array('error' => 'Request was downloaded, but file can not be found, try again');
-    } else if (filesize($tmp['location']) < 1) {
+    } elseif (filesize($tmp['location']) < 1) {
         $response = array('error' => 'Request was downloaded, but there was some problem and now the file is empty, try again');
     } else {
         $extension = str_replace(array('image/', 'text/', 'application/'), '', $response['mime']);
@@ -729,29 +744,35 @@ if (is_array($response) && false === empty($response['mime'])) {
 
             removeOldFiles();
 
-            if (CROSS_DOMAIN === true) {
-                $mime = $response['mime'];
-                $charset = JsonEncodeString($mime, true);
+            $mime = $response['mime'];
 
-                if ($response['encode'] !== null) {
-                    $mime .= ';charset=' . JsonEncodeString($response['encode'], true);
-                }
+            if ($response['encode'] !== null) {
+                $mime .= ';charset=' . JsonEncodeString($response['encode'], true);
+            }
 
+            if (JSONP_CALLBACK === false) {
+                header('Content-Type: ' . $mime);
+                echo file_get_contents($locationFile);
+            } elseif (CROSS_DOMAIN === true) {
                 $tmp = $response = null;
 
+                header('Content-Type: application/javascript');
+
                 if (strpos($mime, 'image/svg') !== 0 && strpos($mime, 'image/') === 0) {
-                    echo $param_callback, '("data:', $mime, ';base64,',
+                    echo JSONP_CALLBACK, '("data:', $mime, ';base64,',
                         base64_encode(
                             file_get_contents($locationFile)
                         ),
                     '");';
                 } else {
-                    echo $param_callback, '("data:', $mime, ',',
+                    echo JSONP_CALLBACK, '("data:', $mime, ',',
                         asciiToInline(file_get_contents($locationFile)),
                     '");';
                 }
             } else {
                 $tmp = $response = null;
+
+                header('Content-Type: application/javascript');
 
                 $dir_name = dirname($_SERVER['SCRIPT_NAME']);
 
@@ -759,7 +780,7 @@ if (is_array($response) && false === empty($response['mime'])) {
                     $dir_name = '';
                 }
 
-                echo $param_callback, '(',
+                echo JSONP_CALLBACK, '(',
                     JsonEncodeString(
                         ($http_port === 443 ? 'https://' : 'http://') .
                         preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
@@ -786,9 +807,11 @@ if (is_array($tmp) && isset($tmp['location']) && file_exists($tmp['location'])) 
 //errors
 setHeaders(true);//no-cache
 
+header('Content-Type: application/javascript');
+
 removeOldFiles();
 
-echo $param_callback, '(',
+echo JSONP_CALLBACK, '(',
     JsonEncodeString(
         'error: html2canvas-proxy-php: ' . $response['error']
     ),

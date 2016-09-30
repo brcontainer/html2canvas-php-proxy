@@ -1,11 +1,17 @@
 ### Changelog ###
 
+#### html2canvas-php-proxy 0.2.0 ####
+
+ * Support for html2canvas 0.5
+
+#### html2canvas-php-proxy 0.1.14 ####
+
+ * Fixed bug if CURL is not avaliable
+
 #### html2canvas-php-proxy 0.1.13 ####
 
  * Added support to CURL for improve usage in PHP 5.6
  * Organized functions
-
-### Changelog ###
 
 #### html2canvas-php-proxy 0.1.12 ####
 
