@@ -421,7 +421,7 @@ function curlDownloadSource($url, $toSource)
     } elseif (is_string(SSL_VERIFY_PEER)) {
         if (is_file(SSL_VERIFY_PEER)) {
             curl_close($ch);
-            return array('error' => 'Not found certificate: ' . $SSL_VERIFY_PEER);
+            return array('error' => 'Not found certificate: ' . SSL_VERIFY_PEER);
         }
 
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
