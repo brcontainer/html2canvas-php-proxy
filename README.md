@@ -13,12 +13,8 @@ You do not use PHP, but need html2canvas working with proxy, see other proxies:
 * [html2canvas proxy in asp classic (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
 * [html2canvas proxy in python (work any framework)](https://github.com/brcontainer/html2canvas-proxy-python)
 
-<<<<<<< HEAD
 ## Problems and solutions
 
-=======
-### Problem and Solution ###
->>>>>>> origin/master
 When adding an image that belongs to another domain in `<canvas>` and after that try to export the canvas
 for a new image, a security error occurs (actually occurs is a security lock), which can return the error:
 
