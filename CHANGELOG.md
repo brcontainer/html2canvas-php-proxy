@@ -1,28 +1,28 @@
-### Changelog ###
+# Changelog
 
-#### html2canvas-php-proxy 0.2.0 ####
+## html2canvas-php-proxy 0.2.0
 
  * Support for html2canvas 0.5
 
-#### html2canvas-php-proxy 0.1.14 ####
+## html2canvas-php-proxy 0.1.14
 
  * Fixed bug if CURL is not avaliable
 
-#### html2canvas-php-proxy 0.1.13 ####
+## html2canvas-php-proxy 0.1.13
 
  * Added support to CURL for improve usage in PHP 5.6
  * Organized functions
 
-#### html2canvas-php-proxy 0.1.12 ####
+## html2canvas-php-proxy 0.1.12
 
  * Replace 0755 to 0666 permission for backup folder (`images/`)
 
-#### html2canvas-php-proxy 0.1.11 ####
+## html2canvas-php-proxy 0.1.11
 
  * Now using camelCase in functions
  * Fixed extension SVG in saved sources
 
-#### html2canvas-php-proxy 0.1.10 ####
+## html2canvas-php-proxy 0.1.10
 
 * Added support to data URI scheme
 * Added support to SVG images
@@ -30,11 +30,11 @@
 * `json_encode_string` function now has a parameter that removes the quotes from the beginning and end of the string.
 * Extra in pullrequest: [pull/10](https://github.com/brcontainer/html2canvas-php-proxy/pull/10) - Thanks to [@jhewes](https://github.com/jhewes)
 
-#### html2canvas-php-proxy 0.1.9 ####
+## html2canvas-php-proxy 0.1.9
 
 * Added support to "HTTP Basic access authentication"
 
-#### html2canvas-php-proxy 0.1.8 ####
+## html2canvas-php-proxy 0.1.8
 
 * Removed unused vars
 * Replace tabs by spaces (size 4)
@@ -46,7 +46,7 @@
 * Added detect "SSL socket stream" support (If the socket requires "SSL", but do not have suporter then shows an error, but if you do not need to "SSL", even if it is not supported, then the code will work without showing error.)
 * Removed `?>` to prevent whitespace.
 
-#### html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014 ####
+## html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014
 
 * Changed order of functions
 * Removed `$e` variable (unused) in `json_encode`
@@ -58,7 +58,7 @@
 * Added comparison of "socket time limit (timeout)" and "max_execution_time" (php.ini), preventing the page goes blank - version 0.1.7
 * Fixed urls like `//website.com/path/../file.png` to `http://website.com/file.png`
 
-#### html2canvas-php-proxy 0.1.5 - 04.05.2014 ####
+## html2canvas-php-proxy 0.1.5 - 04.05.2014
 
 * Improved "typing" for better updates/pull-request
 * Converted various variables to (int)
@@ -78,7 +78,7 @@
 * Added comments in functions
 
 
-#### html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014 ####
+## html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014
 
 * Added support to javascript functions based in Objects (update to 0.1.2)
 * Fixed bug in 0.1.2 (update to 0.1.3)
@@ -89,7 +89,7 @@
 * "remove_old_files function" removes only the files with prefix (0.1.4)
 
 
-#### html2canvas-php-proxy 0.1.1 - 01.12.2013 ####
+## html2canvas-php-proxy 0.1.1 - 01.12.2013
 
 * Support for PHP 4.3
 * Replace `isset($vector['var']{0})` by `isset($vector['var']) && strlen($vector['var'])>0` to prevent the error `Uninitialized string offset: 0`
@@ -102,7 +102,7 @@
 * Fixed "validate" callback param
 
 
-#### html2canvas-php-proxy 0.1.0 - 24.11.2013 ####
+## html2canvas-php-proxy 0.1.0 - 24.11.2013
 
 * Script completely rewritten
 * Added detection list "Content-length:" header
@@ -120,7 +120,7 @@
 * In addition to other improvements when the script was rewritten
 
 
-#### html2canvas-php-proxy 0.0.4 - 20.11.2013 ####
+## html2canvas-php-proxy 0.0.4 - 20.11.2013
 
 * Fixed tmp fileName $locationFile.$token
 * Use complete URI scheme for https

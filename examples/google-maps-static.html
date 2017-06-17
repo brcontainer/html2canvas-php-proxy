@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Google Maps static and html2canvas</title>
+        <style type="text/css">
+        #static_map {
+            background-color: #ccc;
+            padding: 5px;
+            display: inline-block;
+        }
+        #static_map > img {
+            border: 1px #c0c0c0 solid;
+            width: 600px;
+            height: 300px;
+        }
+        </style>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+        <script type="text/javascript">
+        window.onload = function () {
+            function convert(target) {
+                html2canvas(target, {
+                    "proxy": "../html2canvasproxy.php",
+                    "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                    "onrendered": function(canvas) {
+                        var img = new Image();
+                            img.onload = function () {
+                                img.onload = null;
+                                document.getElementById("output").appendChild(img);
+                            };
+                            img.src = canvas.toDataURL("image/png");
+                    }
+                });
+            }
+
+            document.getElementById("save1").onclick = function () {
+                convert(document.getElementById("static_map"));
+            };
+
+            document.getElementById("save2").onclick = function () {
+                convert(document.getElementById("container"));
+            };
+        };
+        </script>
+    </head>
+    <body>
+        <h1>Google Maps static and html2canvas</h1>
+        <p>Tested on Chrome and Firefox</p>
+        <p>
+            <strong>REQUIRES API KEY</strong>,
+            obtain in: https://developers.google.com/maps/documentation/javascript/get-api-key
+        </p>
+
+        <div id="container">
+            <h2>Maps example:</h2>
+            <div id="static_map">
+                <img src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&amp;zoom=13&amp;size=600x300&amp;maptype=roadmap
+&amp;markers=color:blue%7Clabel:S%7C40.702147,-74.015794&amp;markers=color:green%7Clabel:G%7C40.711614,-74.012318
+&amp;markers=color:red%7Clabel:C%7C40.718217,-73.998284
+&amp;key=YOUR_API_KEY">
+            </div>
+            <div>
+                <button id="save1">Save #map_canvas</button>
+                <button id="save2">Save #container</button>
+            </div>
+        </div>
+
+        <div id="output">
+            <h1>Output results:</h1>
+        </div>
+    </body>
+</html>

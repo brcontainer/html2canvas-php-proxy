@@ -1,12 +1,11 @@
-html2canvas-php-proxy 0.2.0
-===========================
+## html2canvas-php-proxy 0.2.0
 
-#### PHP Proxy html2canvas ####
+## PHP Proxy html2canvas
 
 This script allows you to use **html2canvas.js** with different servers, ports and protocols (http, https),
 preventing to occur "tainted" when exporting the `<canvas>` for image.
 
-### Others scripting language ###
+## Others scripting language
 
 You do not use PHP, but need html2canvas working with proxy, see other proxies:
 
@@ -14,7 +13,12 @@ You do not use PHP, but need html2canvas working with proxy, see other proxies:
 * [html2canvas proxy in asp classic (vbscript)](https://github.com/brcontainer/html2canvas-asp-vbscript-proxy)
 * [html2canvas proxy in python (work any framework)](https://github.com/brcontainer/html2canvas-proxy-python)
 
+<<<<<<< HEAD
+## Problems and solutions
+
+=======
 ### Problem and Solution ###
+>>>>>>> origin/master
 When adding an image that belongs to another domain in `<canvas>` and after that try to export the canvas
 for a new image, a security error occurs (actually occurs is a security lock), which can return the error:
 
@@ -22,11 +26,23 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 >
 > Error: An attempt was made to break through the security policy of the user agent.
 
-### Follow ###
+If using Google Maps (or google maps static) you can get this error in console:
+
+> Google Maps API error: MissingKeyMapError
+
+You need get a API Key in: https://developers.google.com/maps/documentation/javascript/get-api-key
+
+If get this error:
+
+> Access to Image at 'file:///...' from origin 'null' has been blocked by CORS policy: Invalid response. Origin 'null' is therefore not allowed access.
+
+Means that you are not using an HTTP server, html2canvas does not work over the "file:///" protocol, use Apache, Nginx or IIS with PHP for work.
+
+## Follow
 
 I ask you to follow me or "star" my repository to track updates
 
-### Run script in Cross-domain (data URI scheme) ###
+## Run script in Cross-domain (data URI scheme)
 
 (See details: https://github.com/brcontainer/html2canvas-php-proxy/issues/9)
 
@@ -46,7 +62,7 @@ Disable cross-domain in proxy server:
 
 `define('CROSS_DOMAIN', 0);`
 
-### Setup ###
+## Setup
 
 Definition | Description
 --- | ---
@@ -60,7 +76,7 @@ Definition | Description
 `define('PREFER_CURL', true);`       | Prefer curl if avaliable or disable
 `define('SSL_VERIFY_PEER', false);`  | Set false for disable SSL checking or true for enable (require config PHP.INI with `curl.cainfo=/path/to/cacert.pem`). You can set path manualy like this: `define('SSL_VERIFY_PEER', '/path/to/cacert.pem');`
 
-### Usage ###
+## Usage
 
 > Note: Requires PHP 4.3.0+
 
@@ -111,7 +127,7 @@ Definition | Description
 </html>
 ```
 
-#### Using Web Console ####
+## Using Web Console
 
 If you have any problems with the script recommend to analyze the log use the Web Console from your browser:
 * Firefox: https://developer.mozilla.org/en-US/docs/Tools/Browser_Console
@@ -131,16 +147,16 @@ Replace `[DOMAIN]` by your domain (eg. 127.0.0.1) and replace `[PATH]` by your p
 
 `http://localhost/project-1/test/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&callback=html2canvas_0`
 
-
-### Changelog ###
+## Changelog
 
 Changelog moved to https://github.com/brcontainer/html2canvas-php-proxy/blob/master/CHANGELOG.md
 
-
-### Next version ###
+## Next versions
 
 Details of future versions are being studied, in other words, can happen as can be forsaken ideas.
 The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on [issues](https://github.com/brcontainer/html2canvas-php-proxy/issues/new).
 
 * Etag cache browser for use HTTP 304 (resources are reusable, avoiding unnecessary downloads)
 * Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by `DEFINE();`
+* Rewrinte script using [PSR-4](http://www.php-fig.org/psr/psr-4/)
+* Support to `composer`

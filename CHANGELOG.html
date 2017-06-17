@@ -1014,167 +1014,125 @@ body .markdown-body
     page-break-after: avoid;
   }
 }
-</style><title>README</title></head><body><article class="markdown-body"><h2 id="html2canvas-php-proxy-020"><a name="user-content-html2canvas-php-proxy-020" href="#html2canvas-php-proxy-020" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.2.0</h2>
-<h2 id="php-proxy-html2canvas"><a name="user-content-php-proxy-html2canvas" href="#php-proxy-html2canvas" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>PHP Proxy html2canvas</h2>
-<p>This script allows you to use <strong>html2canvas.js</strong> with different servers, ports and protocols (http, https),<br />
-preventing to occur &ldquo;tainted&rdquo; when exporting the <code>&lt;canvas&gt;</code> for image.</p>
-<h2 id="others-scripting-language"><a name="user-content-others-scripting-language" href="#others-scripting-language" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Others scripting language</h2>
-<p>You do not use PHP, but need html2canvas working with proxy, see other proxies:</p>
+</style><title>CHANGELOG</title></head><body><article class="markdown-body"><h1 id="changelog"><a name="user-content-changelog" href="#changelog" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Changelog</h1>
+<h2 id="html2canvas-php-proxy-020"><a name="user-content-html2canvas-php-proxy-020" href="#html2canvas-php-proxy-020" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.2.0</h2>
 <ul>
-<li><a href="https://github.com/brcontainer/html2canvas-csharp-proxy">html2canvas proxy in asp.net (csharp)</a></li>
-<li><a href="https://github.com/brcontainer/html2canvas-asp-vbscript-proxy">html2canvas proxy in asp classic (vbscript)</a></li>
-<li><a href="https://github.com/brcontainer/html2canvas-proxy-python">html2canvas proxy in python (work any framework)</a></li>
+<li>Support for html2canvas 0.5</li>
 </ul>
-<h2 id="problems-and-solutions"><a name="user-content-problems-and-solutions" href="#problems-and-solutions" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Problems and solutions</h2>
-<p>When adding an image that belongs to another domain in <code>&lt;canvas&gt;</code> and after that try to export the canvas<br />
-for a new image, a security error occurs (actually occurs is a security lock), which can return the error:</p>
-<blockquote>
-<p>SecurityError: DOM Exception 18</p>
-<p>Error: An attempt was made to break through the security policy of the user agent.</p>
-</blockquote>
-<p>If using Google Maps (or google maps static) you can get this error in console:</p>
-<blockquote>
-<p>Google Maps API error: MissingKeyMapError</p>
-</blockquote>
-<p>You need get a API Key in: <a href="https://developers.google.com/maps/documentation/javascript/get-api-key">https://developers.google.com/maps/documentation/javascript/get-api-key</a></p>
-<p>If get this error:</p>
-<blockquote>
-<p>Access to Image at &lsquo;file:///&hellip;&rsquo; from origin &lsquo;null&rsquo; has been blocked by CORS policy: Invalid response. Origin &lsquo;null&rsquo; is therefore not allowed access.</p>
-</blockquote>
-<p>Means that you are not using an HTTP server, html2canvas does not work over the &ldquo;file:///&rdquo; protocol, use Apache, Nginx or IIS with PHP for work.</p>
-<h2 id="follow"><a name="user-content-follow" href="#follow" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Follow</h2>
-<p>I ask you to follow me or &ldquo;star&rdquo; my repository to track updates</p>
-<h2 id="run-script-in-cross-domain-data-uri-scheme"><a name="user-content-run-script-in-cross-domain-data-uri-scheme" href="#run-script-in-cross-domain-data-uri-scheme" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Run script in Cross-domain (data URI scheme)</h2>
-<p>(See details: <a href="https://github.com/brcontainer/html2canvas-php-proxy/issues/9">https://github.com/brcontainer/html2canvas-php-proxy/issues/9</a>)</p>
-<blockquote>
-<p>Note: Enable cross-domain in proxy server can consume more memory, but can be faster in execution it performs only one request at the proxy server.</p>
-<p>Note: If the file html2canvasproxy.php is in the same domain that your project, you do not need to enable this option.</p>
-<p>Note: Disable the &ldquo;cross-domain&rdquo; does not mean you will not be able to capture images from different servers, in other words, the &ldquo;cross-domain&rdquo; here refers to &ldquo;html2canvas.js&rdquo; (not necessarily the javascript file, but the place where runs) and the &ldquo;html2canvas.php&rdquo; are in different domains, the &ldquo;cross-domain&rdquo; here refers domain.</p>
-</blockquote>
-<p>In some cases you may want to use this <a href="https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php">html2canvasproxy.php</a> on a specific server, but the &ldquo;html2canvas.js&rdquo; and another server, this would cause problems in your project with the security causing failures in execution. In order to use security just set in the <a href="https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php">html2canvasproxy.php</a>:</p>
-<p>Enable cross-domain in proxy server:</p>
-<p><code>define('CROSS_DOMAIN', 1);</code></p>
-<p>Disable cross-domain in proxy server:</p>
-<p><code>define('CROSS_DOMAIN', 0);</code></p>
-<h2 id="setup"><a name="user-content-setup" href="#setup" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Setup</h2>
-<table>
-<thead>
-<tr>
-<th>Definition</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>define('JSLOG', 'console.log');</code></td>
-<td>(Removed in 0.2.0) Configure alternative function log, eg. <code>console.log</code>, <code>alert</code>, <code>custom_function</code></td>
-</tr>
-<tr>
-<td><code>define('PATH', 'images/saved');</code></td>
-<td>Folder where the images are saved</td>
-</tr>
-<tr>
-<td><code>define('PATH_PERMISSION', 0666);</code></td>
-<td>Set forlder permission (use 644 or 666 for remove execution for prevent sploits)</td>
-</tr>
-<tr>
-<td><code>define('CCACHE', 60 * 5 * 1000);</code></td>
-<td>Limit access-control and cache in seconds, define 0/false/null/-1 to not use &ldquo;http header cache&rdquo;</td>
-</tr>
-<tr>
-<td><code>define('TIMEOUT', 30);</code></td>
-<td>Timeout from load Socket</td>
-</tr>
-<tr>
-<td><code>define('MAX_LOOP', 10);</code></td>
-<td>Configure loop limit for redirects (location header)</td>
-</tr>
-<tr>
-<td><code>define('CROSS_DOMAIN', false);</code></td>
-<td>Enable use of &ldquo;data URI scheme&rdquo;</td>
-</tr>
-<tr>
-<td><code>define('PREFER_CURL', true);</code></td>
-<td>Prefer curl if avaliable or disable</td>
-</tr>
-<tr>
-<td><code>define('SSL_VERIFY_PEER', false);</code></td>
-<td>Set false for disable SSL checking or true for enable (require config PHP.INI with <code>curl.cainfo=/path/to/cacert.pem</code>). You can set path manualy like this: <code>define('SSL_VERIFY_PEER', '/path/to/cacert.pem');</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="usage"><a name="user-content-usage" href="#usage" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Usage</h2>
-<blockquote>
-<p>Note: Requires PHP 4.3.0+</p>
-</blockquote>
+<h2 id="html2canvas-php-proxy-0114"><a name="user-content-html2canvas-php-proxy-0114" href="#html2canvas-php-proxy-0114" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.14</h2>
 <ul>
-<li><a href="https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/google-maps.html">Google maps</a></li>
-<li><a href="https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/usable-example.html">Test case</a></li>
+<li>Fixed bug if CURL is not avaliable</li>
 </ul>
-<pre><code class="html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-    &lt;head&gt;
-        &lt;meta charset=&quot;utf-8&quot;&gt;
-        &lt;title&gt;html2canvas php proxy&lt;/title&gt;
-        &lt;script src=&quot;html2canvas.js&quot;&gt;&lt;/script&gt;
-        &lt;script&gt;
-        //&lt;![CDATA[
-        (function() {
-            window.onload = function(){
-                html2canvas(document.body, {
-                    &quot;logging&quot;: true, //Enable log (use Web Console for get Errors and Warnings)
-                    &quot;proxy&quot;:&quot;html2canvasproxy.php&quot;,
-                    &quot;onrendered&quot;: function(canvas) {
-                        var img = new Image();
-                        img.onload = function() {
-                            img.onload = null;
-                            document.body.appendChild(img);
-                        };
-                        img.onerror = function() {
-                            img.onerror = null;
-                            if(window.console.log) {
-                                window.console.log(&quot;Not loaded image from canvas.toDataURL&quot;);
-                            } else {
-                                alert(&quot;Not loaded image from canvas.toDataURL&quot;);
-                            }
-                        };
-                        img.src = canvas.toDataURL(&quot;image/png&quot;);
-                    }
-                });
-            };
-        })();
-        //]]&gt;
-        &lt;/script&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;p&gt;
-            &lt;img alt=&quot;google maps static&quot; src=&quot;http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&amp;amp;zoom=12&amp;amp;size=800x600&amp;amp;maptype=roadmap&amp;amp;sensor=false&quot;&gt;
-        &lt;/p&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<h2 id="using-web-console"><a name="user-content-using-web-console" href="#using-web-console" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Using Web Console</h2>
-<p>If you have any problems with the script recommend to analyze the log use the Web Console from your browser:<br />
-<em> Firefox: <a href="https://developer.mozilla.org/en-US/docs/Tools/Browser_Console"><a href="https://developer.mozilla.org/en-US/docs/Tools/Browser_Console">https://developer.mozilla.org/en-US/docs/Tools/Browser_Console</a></a><br />
-</em> Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/console">https://developers.google.com/chrome-developer-tools/docs/console</a><br />
-* InternetExplorer: <a href="http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx</a></p>
-<p>Get NetWork results:<br />
-<em> Firefox: <a href="https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/"><a href="https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/">https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/</a></a><br />
-</em> Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/network">https://developers.google.com/chrome-developer-tools/docs/network</a><br />
-* InternetExplorer: <a href="http://msdn.microsoft.com/en-us/library/gg130952%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/gg130952%28v=vs.85%29.aspx</a></p>
-<p>An alternative is to diagnose problems accessing the link directly:</p>
-<p><code>http://[DOMAIN]/[PATH]/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&amp;callback=html2canvas_0</code></p>
-<p>Replace <code>[DOMAIN]</code> by your domain (eg. 127.0.0.1) and replace <code>[PATH]</code> by your project folder (eg. project-1/test), something like:</p>
-<p><code>http://localhost/project-1/test/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&amp;callback=html2canvas_0</code></p>
-<h2 id="changelog"><a name="user-content-changelog" href="#changelog" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Changelog</h2>
-<p>Changelog moved to <a href="https://github.com/brcontainer/html2canvas-php-proxy/blob/master/CHANGELOG.md">https://github.com/brcontainer/html2canvas-php-proxy/blob/master/CHANGELOG.md</a></p>
-<h2 id="next-versions"><a name="user-content-next-versions" href="#next-versions" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Next versions</h2>
-<p>Details of future versions are being studied, in other words, can happen as can be forsaken ideas.<br />
-The ideas here are not ready or are not public in the main script, are only suggestions. You can offer suggestions on <a href="https://github.com/brcontainer/html2canvas-php-proxy/issues/new">issues</a>.</p>
+<h2 id="html2canvas-php-proxy-0113"><a name="user-content-html2canvas-php-proxy-0113" href="#html2canvas-php-proxy-0113" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.13</h2>
 <ul>
-<li>Etag cache browser for use HTTP 304 (resources are reusable, avoiding unnecessary downloads)</li>
-<li>Cache from SOCKET, if not specified header cache in SOCKET, then uses settings by <code>DEFINE();</code></li>
-<li>Rewrinte script using <a href="http://www.php-fig.org/psr/psr-4/">PSR-4</a></li>
-<li>Support to <code>composer</code></li>
+<li>Added support to CURL for improve usage in PHP 5.6</li>
+<li>Organized functions</li>
+</ul>
+<h2 id="html2canvas-php-proxy-0112"><a name="user-content-html2canvas-php-proxy-0112" href="#html2canvas-php-proxy-0112" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.12</h2>
+<ul>
+<li>Replace 0755 to 0666 permission for backup folder (<code>images/</code>)</li>
+</ul>
+<h2 id="html2canvas-php-proxy-0111"><a name="user-content-html2canvas-php-proxy-0111" href="#html2canvas-php-proxy-0111" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.11</h2>
+<ul>
+<li>Now using camelCase in functions</li>
+<li>Fixed extension SVG in saved sources</li>
+</ul>
+<h2 id="html2canvas-php-proxy-0110"><a name="user-content-html2canvas-php-proxy-0110" href="#html2canvas-php-proxy-0110" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.10</h2>
+<ul>
+<li>Added support to data URI scheme</li>
+<li>Added support to SVG images</li>
+<li>Fixed BUG (Windows servers) with <code>dirname</code>, If the script was located in the root folder, the <code>dirname</code> function had an invalid character for additional urls generated by this script.</li>
+<li><code>json_encode_string</code> function now has a parameter that removes the quotes from the beginning and end of the string.</li>
+<li>Extra in pullrequest: <a href="https://github.com/brcontainer/html2canvas-php-proxy/pull/10">pull/10</a> - Thanks to <a href="https://github.com/jhewes">@jhewes</a></li>
+</ul>
+<h2 id="html2canvas-php-proxy-019"><a name="user-content-html2canvas-php-proxy-019" href="#html2canvas-php-proxy-019" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.9</h2>
+<ul>
+<li>Added support to &ldquo;HTTP Basic access authentication&rdquo;</li>
+</ul>
+<h2 id="html2canvas-php-proxy-018"><a name="user-content-html2canvas-php-proxy-018" href="#html2canvas-php-proxy-018" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.8</h2>
+<ul>
+<li>Removed unused vars</li>
+<li>Replace tabs by spaces (size 4)</li>
+<li>Added <code>=== false</code> misses in <code>isset()</code></li>
+<li>Improved type</li>
+<li>Removed <code>empty($maxExec)</code></li>
+<li>Removed unnecessary <code>=== true</code></li>
+<li>Replace <code>mkdir(PATH, 755)</code> to <code>mkdir(PATH, 0755)</code></li>
+<li>Added detect &ldquo;SSL socket stream&rdquo; support (If the socket requires &ldquo;SSL&rdquo;, but do not have suporter then shows an error, but if you do not need to &ldquo;SSL&rdquo;, even if it is not supported, then the code will work without showing error.)</li>
+<li>Removed <code>?&gt;</code> to prevent whitespace.</li>
+</ul>
+<h2 id="html2canvas-php-proxy-016-and-017-07052014"><a name="user-content-html2canvas-php-proxy-016-and-017-07052014" href="#html2canvas-php-proxy-016-and-017-07052014" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.6 and 0.1.7 - 07.05.2014</h2>
+<ul>
+<li>Changed order of functions</li>
+<li>Removed <code>$e</code> variable (unused) in <code>json_encode</code></li>
+<li>Fixed line <code>$response = 'Failed to rename the temporary file';</code> (<code>$response</code> is array)</li>
+<li>Removed incompatibility with PHP old versions (before 5.1.0) in <code>relative2absolute</code></li>
+<li>Added returns &ldquo;blank&rdquo; in <code>relative2absolute</code> (if <code>scheme</code> invalid in <code>$m</code> parameter)</li>
+<li>Added detect problem in redirects (if you have multiple redirects)</li>
+<li>Replace <code>stripos</code> by <code>strpos</code> (php4) - version 0.1.7</li>
+<li>Added comparison of &ldquo;socket time limit (timeout)&rdquo; and &ldquo;max_execution_time&rdquo; (php.ini), preventing the page goes blank - version 0.1.7</li>
+<li>Fixed urls like <code>//website.com/path/../file.png</code> to <code>http://website.com/file.png</code></li>
+</ul>
+<h2 id="html2canvas-php-proxy-015-04052014"><a name="user-content-html2canvas-php-proxy-015-04052014" href="#html2canvas-php-proxy-015-04052014" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.5 - 04.05.2014</h2>
+<ul>
+<li>Improved &ldquo;typing&rdquo; for better updates/pull-request</li>
+<li>Converted various variables to (int)</li>
+<li>Removed must-revalidate in header</li>
+<li>Improved forks</li>
+<li>Improved http response, If http_status&lt;&gt;200, return error in html2canvas</li>
+<li>Fixed bug in Facebook redirect (HTTP/1.1 302 forced.302)</li>
+<li>Removed unnecessary Etag-header</li>
+<li>Fixed undefined variables</li>
+<li>Fixed bug in <code>json_encode_string</code> (characters)</li>
+<li>Fixed &ldquo;invalid escapes&rdquo; in <code>json_encode_string</code></li>
+<li>Improved performance in <code>json_encode_string</code></li>
+<li>Removed <code>utf8_encode</code> (unnecessary) in <code>json_encode_string</code></li>
+<li>Fixed bug in <code>relative2absolute</code></li>
+<li><code>downloadSource</code> always returns array</li>
+<li>Replace <code>error_get_last</code> by <code>get_error</code></li>
+<li>Added comments in functions</li>
+</ul>
+<h2 id="html2canvas-php-proxy-012-to-014-17032014"><a name="user-content-html2canvas-php-proxy-012-to-014-17032014" href="#html2canvas-php-proxy-012-to-014-17032014" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.2 to 0.1.4 - 17.03.2014</h2>
+<ul>
+<li>Added support to javascript functions based in Objects (update to 0.1.2)</li>
+<li>Fixed bug in 0.1.2 (update to 0.1.3)</li>
+<li>Added support to &ldquo;relative paths&rdquo; (function relative2absolute) (0.1.4)</li>
+<li>Added &ldquo;referrer header&rdquo; (if exists) (0.1.4)</li>
+<li>Added &ldquo;remove charset&rdquo; for mime-types (eg. text/html; charset=ut8 =&gt; text/html) (0.1.4)</li>
+<li>Added prefix in files created by html2canvas-php-proxy (0.1.4)</li>
+<li>&ldquo;remove_old_files function&rdquo; removes only the files with prefix (0.1.4)</li>
+</ul>
+<h2 id="html2canvas-php-proxy-011-01122013"><a name="user-content-html2canvas-php-proxy-011-01122013" href="#html2canvas-php-proxy-011-01122013" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.1 - 01.12.2013</h2>
+<ul>
+<li>Support for PHP 4.3</li>
+<li>Replace <code>isset($vector['var']{0})</code> by <code>isset($vector['var']) &amp;&amp; strlen($vector['var'])&gt;0</code> to prevent the error <code>Uninitialized string offset: 0</code></li>
+<li><code>MAX_EXEC</code> may not be less than 15 seconds</li>
+<li>Add support to bitmap files</li>
+<li>If the parameter &ldquo;callback&rdquo; has invalid characters then sets the variable <code>$param_callback</code> with <code>JSLOG</code>;</li>
+<li>Detects if the &ldquo;host:&rdquo; header was set by the client</li>
+<li>Remove port from <code>$_SERVER['HTTP_HOST']</code> to prevent problem in the formatting of the address</li>
+<li>Add function for remove old files</li>
+<li>Fixed &ldquo;validate&rdquo; callback param</li>
+</ul>
+<h2 id="html2canvas-php-proxy-010-24112013"><a name="user-content-html2canvas-php-proxy-010-24112013" href="#html2canvas-php-proxy-010-24112013" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.1.0 - 24.11.2013</h2>
+<ul>
+<li>Script completely rewritten</li>
+<li>Added detection list &ldquo;Content-length:&rdquo; header</li>
+<li>Added alternative to callback parameter (eg. The function call is <code>console.log</code> or <code>alert()</code>, if there is no callback parameter)</li>
+<li>Added support for detecting max_execution_time</li>
+<li>Added the use of <code>erro_get_last()</code></li>
+<li>Added support for &ldquo;Location:&rdquo; header</li>
+<li>Added support for detecting 304 HTTP, return an error warning (socket does not use/send Etags)</li>
+<li>Added <code>utf8_encode</code> to <code>json_encode</code> to prevent the error string becomes NULL</li>
+<li>Added an error warning, if there is no the file &ldquo;Content-type:&rdquo; header</li>
+<li>In case of HTTP 3xx response, if there is no &ldquo;Location:&rdquo; header, returns an error warning</li>
+<li>Improved response headers from proxy (<code>function setHeaders</code>)</li>
+<li>Improved validation http/https (<code>function isHttpUrl</code>)</li>
+<li>Prevent warning in <code>rename()</code> (PHP 5.2 in CGI), because the warning <code>return false;</code></li>
+<li>In addition to other improvements when the script was rewritten</li>
+</ul>
+<h2 id="html2canvas-php-proxy-004-20112013"><a name="user-content-html2canvas-php-proxy-004-20112013" href="#html2canvas-php-proxy-004-20112013" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>html2canvas-php-proxy 0.0.4 - 20.11.2013</h2>
+<ul>
+<li>Fixed tmp fileName $locationFile.$token</li>
+<li>Use complete URI scheme for https</li>
 </ul></article></body></html>
