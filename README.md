@@ -50,31 +50,32 @@ I ask you to follow me or "star" my repository to track updates
 
 In some cases you may want to use this [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php) on a specific server, but the "html2canvas.js" and another server, this would cause problems in your project with the security causing failures in execution. In order to use security just set in the [html2canvasproxy.php](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/html2canvasproxy.php):
 
-Enable cross-domain in proxy server:
+Enable data uri scheme for use proxy for all servers:
 
-`define('CROSS_DOMAIN', 1);`
+`define('H2CP_DATAURI', true);`
 
-Disable cross-domain in proxy server:
+Disable data uri scheme:
 
-`define('CROSS_DOMAIN', 0);`
+`define('H2CP_DATAURI', false);`
 
 ## Setup
 
 Definition | Description
 --- | ---
-`define('JSLOG', 'console.log');`    | (Removed in 0.2.0) Configure alternative function log, eg. `console.log`, `alert`, `custom_function`
-`define('PATH', 'images/saved');`    | Folder where the images are saved
-`define('PATH_PERMISSION', 0666);`   | Set forlder permission (use 644 or 666 for remove execution for prevent sploits)
-`define('CCACHE', 60 * 5 * 1000);`   | Limit access-control and cache in seconds, define 0/false/null/-1 to not use "http header cache"
-`define('TIMEOUT', 30);`             | Timeout from load Socket
-`define('MAX_LOOP', 10);`            | Configure loop limit for redirects (location header)
-`define('CROSS_DOMAIN', false);`     | Enable use of "data URI scheme"
-`define('PREFER_CURL', true);`       | Prefer curl if avaliable or disable
-`define('SSL_VERIFY_PEER', false);`  | Set false for disable SSL checking or true for enable (require config PHP.INI with `curl.cainfo=/path/to/cacert.pem`). You can set path manualy like this: `define('SSL_VERIFY_PEER', '/path/to/cacert.pem');`
+`define('H2CP_PATH', 'cache');`                   | Folder where the images are saved
+`define('H2CP_PERMISSION', 0666);`                | Set forlder permission (use 644 or 666 for remove execution for prevent sploits)
+`define('H2CP_CACHE', 60 * 5 * 1000);`            | Limit access-control and cache in seconds, define 0/false/null/-1 to not use "http header cache"
+`define('H2CP_TIMEOUT', 20);`                     | Timeout from load Socket
+`define('H2CP_MAX_LOOP', 10);`                    | Configure loop limit for redirects (location header)
+`define('H2CP_DATAURI', false);`                  | Enable use of "data URI scheme"
+`define('H2CP_PREFER_CURL', true);`               | Prefer curl if avaliable or disable
+`define('H2CP_SSL_VERIFY_PEER', false);`          | Set false for disable SSL checking or true for enable (require config PHP.INI with `curl.cainfo=/path/to/cacert.pem`). You can set path manualy like this: `define('H2CP_SSL_VERIFY_PEER', '/path/to/cacert.pem');`
+`define('H2CP_ALLOWED_DOMAINS', array( '*' ));`   | `*` allow all domains, for subdomains use like this `*.site.com`, for fixed domains use `array( 'site.com', 'www.site.com' )`
+`define('H2CP_ALLOWED_PORTS', array( 80, 443 ));` | Config allowed ports
 
 ## Usage
 
-> Note: Requires PHP 4.3.0+
+> Note: Requires PHP5+
 
 * [Google maps](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/google-maps.html)
 * [Test case](https://github.com/brcontainer/html2canvas-php-proxy/blob/master/examples/usable-example.html)
@@ -92,8 +93,8 @@ Definition | Description
             window.onload = function(){
                 html2canvas(document.body, {
                     "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-                    "proxy":"html2canvasproxy.php",
-                    "onrendered": function(canvas) {
+                    "proxy": "html2canvasproxy.php",
+                    "onrendered": function (canvas) {
                         var img = new Image();
                         img.onload = function() {
                             img.onload = null;

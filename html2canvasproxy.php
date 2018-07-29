@@ -1,46 +1,47 @@
 <?php
 /*
- * html2canvas-php-proxy 0.2.1
+ * html2canvas-php-proxy 1.0.0
  *
- * Copyright (c) 2017 Guilherme Nascimento (brcontainer@yahoo.com.br)
+ * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
  * Released under the MIT license
  */
 
-//Turn off errors because the script already own uses "error_get_last"
+// Turn off errors because the script already own uses "error_get_last"
 ini_set('display_errors', 'Off');
 
-//setup
-define('PATH', 'images');         //relative folder where the images are saved
-define('PATH_PERMISSION', 0666);  //use 644 or 666 for remove execution for prevent sploits
-define('CCACHE', 60 * 5 * 1000);  //Limit access-control and cache, define 0/false/null/-1 to not use "http header cache"
-define('TIMEOUT', 30);            //Timeout from load Socket
-define('MAX_LOOP', 10);           //Configure loop limit for redirects (location header)
-define('CROSS_DOMAIN', false);    //Enable use of "data URI scheme"
-define('PREFER_CURL', true);      //Enable curl if avaliable or disable
+// Setup
+define('H2CP_PATH', 'cache');                   // Relative folder where the images are saved
+define('H2CP_PERMISSION', 0666);                // use 644 or 666 for remove execution for prevent sploits
+define('H2CP_CACHE', 60 * 5 * 1000);            // Limit access-control and cache, define 0/false/null/-1 to prevent cache
+define('H2CP_TIMEOUT', 20);                     // Timeout from load Socket
+define('H2CP_MAX_LOOP', 10);                    // Configure loop limit for redirects (location header)
+define('H2CP_DATAURI', false);                  // Enable use of "data URI scheme"
+define('H2CP_PREFER_CURL', true);               // Enable curl if avaliable or disable
+define('H2CP_SECPREFIX', 'h2cp_');              // Prefix temp filename
+define('H2CP_ALLOWED_DOMAINS', array( '*' ));   // * allow all domains, *.site.com for sub-domains, or fixed domains use array( 'site.com', 'www.site.com' )
+define('H2CP_ALLOWED_PORTS', array( 80, 443 )); // Allowed ports
 
 /*
  * Set false for disable SSL check
  * Set true for enable SSL check, require config `curl.cainfo=/path/to/cacert.pem` in php.ini
- * Set path (string) if need config CAINFO manualy like this define('SSL_VERIFY_PEER', '/path/to/cacert.pem');
+ * Set path (string) if need config CAINFO manually like this define('H2CP_SSL_VERIFY_PEER', '/path/to/cacert.pem');
  */
+define('H2CP_SSL_VERIFY_PEER', false);
 
-define('SSL_VERIFY_PEER', false);
-
-//constants
-define('EOL', chr(10));
-define('WOL', chr(13));
-define('GMDATECACHE', gmdate('D, d M Y H:i:s'));
+// Constants (don't change)
+define('H2CP_EOL', chr(10));
+define('H2CP_WOL', chr(13));
+define('H2CP_GMDATECACHE', gmdate('D, d M Y H:i:s'));
+define('H2CP_INIT_EXEC', time());
+define('H2CP_JSONP', empty($_GET['callback']) ? false : $_GET['callback']);
 
 /*
 If execution has reached the time limit prevents page goes blank (off errors)
 or generate an error in PHP, which does not work with the DEBUG (from html2canvas.js)
 */
 $maxExec = (int) ini_get('max_execution_time');
-define('MAX_EXEC', $maxExec < 1 ? 0 : ($maxExec - 5));//reduces 5 seconds to ensure the execution of the DEBUG
-
-define('INIT_EXEC', time());
-define('SECPREFIX', 'h2c_');
+define('H2CP_MAX_EXEC', $maxExec < 1 ? 0 : ($maxExec - 5));//reduces 5 seconds to ensure the execution of the DEBUG
 
 $http_port = 0;
 
@@ -54,77 +55,63 @@ $response = array();
  */
 function asciiToInline($str)
 {
-    $trans = array();
-    $trans[EOL] = '%0A';
-    $trans[WOL] = '%0D';
-    $trans[' '] = '%20';
-    $trans['"'] = '%22';
-    $trans['#'] = '%23';
-    $trans['&'] = '%26';
-    $trans['\/'] = '%2F';
-    $trans['\\'] = '%5C';
-    $trans[':'] = '%3A';
-    $trans['?'] = '%3F';
-    $trans[chr(0)] = '%00';
-    $trans[chr(8)] = '';
-    $trans[chr(9)] = '%09';
+    static $translate;
 
-    return strtr($str, $trans);
+    if ($translate === null) {
+        $translate = array(
+            H2CP_EOL => '%0A',
+            H2CP_WOL => '%0D',
+            ' ' => '%20',
+            '"' => '%22',
+            '#' => '%23',
+            '&' => '%26',
+            '\/' => '%2F',
+            '\\' => '%5C',
+            ':' => '%3A',
+            '?' => '%3F',
+            chr(0) => '%00',
+            chr(8) => '',
+            chr(9) => '%09'
+        );
+    }
+
+    return strtr($str, $translate);
 }
 
 /**
  * Detect SSL stream transport
- * @return boolean|string        If returns string has an problem, returns true if ok
+ * @return boolean  returns false if have an problem, returns true if ok
 */
 function supportSSL()
 {
-    if (defined('SOCKET_SSL_STREAM')) {
-        return true;
+    static $supported;
+
+    if ($supported !== null) {
+        return $supported;
     }
 
-    if (!function_exists('stream_get_transports')) {
-        /* PHP 5 */
-        if (in_array('ssl', stream_get_transports())) {
-            defined('SOCKET_SSL_STREAM', '1');
-            return true;
-        }
-    } else {
-        /* PHP 4 */
-        ob_start();
-        phpinfo(1);
-
-        $info = strtolower(ob_get_clean());
-
-        if (preg_match('/socket\stransports/', $info) !== 0) {
-            if (preg_match('/(ssl[,]|ssl [,]|[,] ssl|[,]ssl)/', $info) !== 0) {
-                defined('SOCKET_SSL_STREAM', '1');
-                return true;
-            }
-        }
-    }
-
-    return 'No SSL stream support detected';
+    return $supported = in_array('ssl', stream_get_transports());
 }
 
 /**
- * Remove old files defined by CCACHE
- * @return void           return always void
+ * Remove old files defined by H2CP_CACHE
+ * @return void  return always void
  */
 function removeOldFiles()
 {
-    $p = PATH . '/';
+    $p = H2CP_PATH . '/';
 
     if (
-        (MAX_EXEC === 0 || (time() - INIT_EXEC) < MAX_EXEC) && //prevents this function locks the process that was completed
+        (H2CP_MAX_EXEC === 0 || (time() - H2CP_INIT_EXEC) < H2CP_MAX_EXEC) && //prevents this function locks the process that was completed
         (file_exists($p) || is_dir($p))
     ) {
         $h = opendir($p);
         if (false !== $h) {
             while (false !== ($f = readdir($h))) {
                 if (
-                    is_file($p . $f) && is_dir($p . $f) === false &&
-                    strpos($f, SECPREFIX) !== false &&
-                    (INIT_EXEC - filectime($p . $f)) > (CCACHE * 2)
+                    is_file($p . $f) &&
+                    strpos($f, H2CP_SECPREFIX) !== false &&
+                    (H2CP_INIT_EXEC - filectime($p . $f)) > (H2CP_CACHE * 2)
                 ) {
                     unlink($p . $f);
                 }
@@ -134,29 +121,16 @@ function removeOldFiles()
 }
 
 /**
- * this function does not exist by default in php4.3, get detailed error in php5
- * @return array   if has errors
- */
-function getError()
-{
-    if (function_exists('error_get_last') === false) {
-        return error_get_last();
-    }
-
-    return null;
-}
-
-/**
  * Detect if content-type is valid and get charset if available
- * @param string $content    content-type
- * @return array             always return array
+ * @param string $content  content-type
+ * @return array           always return array
  */
 function checkContentType($content)
 {
     $content = strtolower($content);
     $encode = null;
 
-    if (preg_match('#[;](\s|)+charset[=]#', $content) !== 0) {
+    if (preg_match('#[;](\s|)+charset[=]#', $content) === 1) {
         $encode = preg_split('#[;](\s|)+charset[=]#', $content);
         $encode = empty($encode[1]) ? null : trim($encode[1]);
     }
@@ -186,35 +160,40 @@ function checkContentType($content)
 
 /**
  * enconde string in "json" (only strings), json_encode (native in php) don't support for php4
- * @param string $s    to encode
+ * @param string $str  to encode
  * @return string      always return string
  */
-function JsonEncodeString($s, $onlyEncode=false)
+function JsonEncodeString($str, $onlyEncode=false)
 {
-    $vetor = array();
-    $vetor[0]  = '\\0';
-    $vetor[8]  = '\\b';
-    $vetor[9]  = '\\t';
-    $vetor[10] = '\\n';
-    $vetor[12] = '\\f';
-    $vetor[13] = '\\r';
-    $vetor[34] = '\\"';
-    $vetor[47] = '\\/';
-    $vetor[92] = '\\\\';
+    static $translate;
+
+    if ($translate === null) { 
+        $translate = array(
+            0 => '\\0',
+            8 => '\\b',
+            9 => '\\t',
+            10 => '\\n',
+            12 => '\\f',
+            13 => '\\r',
+            34 => '\\"',
+            47 => '\\/',
+            92 => '\\\\'
+        );
+    }
 
     $tmp = '';
     $enc = '';
-    $j = strlen($s);
+    $j = strlen($str);
 
     for ($i = 0; $i < $j; ++$i) {
-        $tmp = substr($s, $i, 1);
+        $tmp = substr($str, $i, 1);
         $c = ord($tmp);
         if ($c > 126) {
             $d = '000' . dechex($c);
             $tmp = '\\u' . substr($d, strlen($d) - 4);
         } else {
-            if (isset($vetor[$c])) {
-                $tmp = $vetor[$c];
+            if (isset($translate[$c])) {
+                $tmp = $translate[$c];
             } elseif (($c > 31) === false) {
                 $d = '000' . dechex($c);
                 $tmp = '\\u' . substr($d, strlen($d) - 4);
@@ -224,7 +203,7 @@ function JsonEncodeString($s, $onlyEncode=false)
         $enc .= $tmp;
     }
 
-    if ($onlyEncode === true) {
+    if ($onlyEncode) {
         return $enc;
     } else {
         return '"' . $enc . '"';
@@ -233,23 +212,23 @@ function JsonEncodeString($s, $onlyEncode=false)
 
 /**
  * set headers in document
- * @param boolean $nocache      If false set cache (if CCACHE > 0), If true set no-cache in document
- * @return void                 return always void
+ * @param boolean $nocache  If false set cache (if H2CP_CACHE > 0), If true set no-cache in document
+ * @return void             return always void
  */
 function setHeaders($nocache)
 {
-    if ($nocache === false && is_int(CCACHE) && CCACHE > 0) {
+    if ($nocache === false && is_int(H2CP_CACHE) && H2CP_CACHE > 0) {
         //save to browser cache
-        header('Last-Modified: ' . GMDATECACHE . ' GMT');
-        header('Cache-Control: max-age=' . (CCACHE - 1));
-        header('Pragma: max-age=' . (CCACHE - 1));
-        header('Expires: ' . gmdate('D, d M Y H:i:s', INIT_EXEC + CCACHE - 1));
-        header('Access-Control-Max-Age:' . CCACHE);
+        header('Last-Modified: ' . H2CP_GMDATECACHE . ' GMT');
+        header('Cache-Control: max-age=' . (H2CP_CACHE - 1));
+        header('Pragma: max-age=' . (H2CP_CACHE - 1));
+        header('Expires: ' . gmdate('D, d M Y H:i:s', H2CP_INIT_EXEC + H2CP_CACHE - 1));
+        header('Access-Control-Max-Age:' . H2CP_CACHE);
     } else {
         //no-cache
         header('Pragma: no-cache');
         header('Cache-Control: no-cache');
-        header('Expires: '. GMDATECACHE .' GMT');
+        header('Expires: '. H2CP_GMDATECACHE .' GMT');
     }
 
     //set access-control
@@ -261,52 +240,53 @@ function setHeaders($nocache)
 
 /**
  * Converte relative-url to absolute-url
- * @param string $u       set base url
- * @param string $m       set relative url
- * @return string         return always string, if have an error, return blank string (scheme invalid)
+ * @param string $url       set base url
+ * @param string $relative  set relative url
+ * @return string           return always string, if have an error, return blank string (scheme invalid)
 */
-function relativeToAbsolute($u, $m)
+function relativeToAbsolute($url, $relative)
 {
-    if (strpos($m, '//') === 0) {//http link //site.com/test
-        return 'http:' . $m;
+    if (strpos($relative, '//') === 0) {//http link //site.com/test
+        return 'http:' . $relative;
     }
 
-    if (preg_match('#^[a-zA-Z0-9]+[:]#', $m) !== 0) {
-        $pu = parse_url($m);
+    if (preg_match('#^[a-z0-9]+[:]#i', $relative) !== 0) {
+        $pu = parse_url($relative);
 
-        if (preg_match('/^(http|https)$/i', $pu['scheme']) === 0) {
+        if (preg_match('#^(http|https)$#i', $pu['scheme']) === 0) {
             return '';
         }
 
-        $m = '';
+        $relative = '';
+
         if (isset($pu['path'])) {
-            $m .= $pu['path'];
+            $relative .= $pu['path'];
         }
 
         if (isset($pu['query'])) {
-            $m .= '?' . $pu['query'];
+            $relative .= '?' . $pu['query'];
         }
 
         if (isset($pu['fragment'])) {
-            $m .= '#' . $pu['fragment'];
+            $relative .= '#' . $pu['fragment'];
         }
 
-        return relativeToAbsolute($pu['scheme'] . '://' . $pu['host'], $m);
+        return relativeToAbsolute($pu['scheme'] . '://' . $pu['host'], $relative);
     }
 
-    if (preg_match('/^[?#]/', $m) !== 0) {
-        return $u . $m;
+    if (preg_match('/^[?#]/', $relative) !== 0) {
+        return $url . $relative;
     }
 
-    $pu = parse_url($u);
+    $pu = parse_url($url);
     $pu['path'] = isset($pu['path']) ? preg_replace('#/[^/]*$#', '', $pu['path']) : '';
 
-    $pm = parse_url('http://1/' . $m);
+    $pm = parse_url('http://1/' . $relative);
     $pm['path'] = isset($pm['path']) ? $pm['path'] : '';
 
     $isPath = $pm['path'] !== '' && strpos(strrev($pm['path']), '/') === 0 ? true : false;
 
-    if (strpos($m, '/') === 0) {
+    if (strpos($relative, '/') === 0) {
         $pu['path'] = '';
     }
 
@@ -323,6 +303,7 @@ function relativeToAbsolute($u, $m)
         if (isset($ab[$i]) === false || $ab[$i] === '.') {
             continue;
         }
+
         if ($ab[$i] === '..') {
             array_pop($nw);
         } else {
@@ -330,14 +311,14 @@ function relativeToAbsolute($u, $m)
         }
     }
 
-    $m  = $pu['scheme'] . '://' . $pu['host'] . '/' . implode('/', $nw) . ($isPath === true ? '/' : '');
+    $relative  = $pu['scheme'] . '://' . $pu['host'] . '/' . implode('/', $nw) . ($isPath ? '/' : '');
 
     if (isset($pm['query'])) {
-        $m .= '?' . $pm['query'];
+        $relative .= '?' . $pm['query'];
     }
 
     if (isset($pm['fragment'])) {
-        $m .= '#' . $pm['fragment'];
+        $relative .= '#' . $pm['fragment'];
     }
 
     $nw = null;
@@ -345,48 +326,112 @@ function relativeToAbsolute($u, $m)
     $pm = null;
     $pu = null;
 
-    return $m;
+    return $relative;
 }
 
 /**
  * validate url
- * @param string $u  set base url
- * @return boolean   return always boolean
+ * @param string $url  set base url
+ * @return boolean     return always boolean
 */
-function isHttpUrl($u)
+function isHttpUrl($url)
 {
-    return preg_match('#^http(|s)[:][/][/][a-z0-9]#i', $u) !== 0;
+    return preg_match('#^http(|s)[:][/][/][a-z0-9]#i', $url) === 1;
+}
+
+/**
+ * check if url is allowed
+ * @param string $url  set base url
+ * @return boolean     return always boolean
+*/
+function isAllowedUrl($url, &$message) {
+    $uri = parse_url($url);
+
+    if (in_array('*', H2CP_ALLOWED_DOMAINS) === false) {
+        $ok = false;
+
+        foreach (H2CP_ALLOWED_DOMAINS as $domain) {
+            if ($domain === $uri['host']) {
+                $ok = true;
+                break;
+            } elseif (strpos($domain, '*') !== false) {
+                $domain = strtr($domain, array(
+                    '*' => '\\w+',
+                    '.' => '\\.'
+                ));
+
+                if (preg_match('#^' . $domain . '$#i', $uri['host']) === 1) {
+                    $ok = true;
+                    break;
+                }
+            }
+        }
+
+        if ($ok === false) {
+            $message = '"' . $uri['host'] . '" domain is not allowed';
+            return false;
+        }
+    }
+
+    if (empty($uri['port'])) {
+        $port = strcasecmp('https', $uri['scheme']) === 0 ? 443 : 80;
+    } else {
+        $port = $uri['port'];
+    }
+
+    $ok = false;
+
+    foreach (H2CP_ALLOWED_PORTS as $allowed_port) {
+        if ($port == $allowed_port) {
+            $ok = true;
+            break;
+        }
+    }
+
+    if ($ok) {
+        return true;
+    }
+
+    if (empty($uri['port'])) {
+        $port = strcasecmp('https', $uri['scheme']) === 0 ? 443 : 80;
+    } else {
+        $port = $uri['port'];
+    }
+
+    $message = '"' . $port . '" port is not allowed';
+
+    return false;
 }
 
 /**
  * create folder for images download
- * @return boolean      return always boolean
+ * @return boolean  return always boolean
 */
 function createFolder()
 {
-    if (file_exists(PATH) === false || is_dir(PATH) === false) {
-        return mkdir(PATH, PATH_PERMISSION);
+    if (file_exists(H2CP_PATH) === false || is_dir(H2CP_PATH) === false) {
+        return mkdir(H2CP_PATH, H2CP_PERMISSION);
     }
+
     return true;
 }
 
 /**
  * create temp file which will receive the download
- * @param string  $basename        set url
- * @param boolean $isEncode        If true uses the "first" temporary name
- * @return boolean|array           If you can not create file return false, If create file return array
+ * @param string  $basename  set url
+ * @param boolean $isEncode  If true uses the "first" temporary name
+ * @return boolean|array     If you can not create file return false, If create file return array
 */
 function createTmpFile($basename, $isEncode)
 {
-    $folder = preg_replace('#[/]$#', '', PATH) . '/';
+    $folder = preg_replace('#[/]$#', '', H2CP_PATH) . '/';
 
     if ($isEncode === false) {
-        $basename = SECPREFIX . sha1($basename);
+        $basename = H2CP_SECPREFIX . strlen($basename) . '.' . sha1($basename);
     }
 
-    //$basename .= $basename;
     $tmpMime  = '.' . mt_rand(0, 1000) . '_';
-    $tmpMime .= $isEncode === true ? time() : INIT_EXEC;
+    $tmpMime .= $isEncode ? time() : H2CP_INIT_EXEC;
 
     if (file_exists($folder . $basename . $tmpMime)) {
         return createTmpFile($basename, true);
@@ -404,6 +449,12 @@ function createTmpFile($basename, $isEncode)
     return false;
 }
 
+/**
+ * download http request using curl extension (If found HTTP 3xx)
+ * @param string   $url       url requested
+ * @param resource $toSource  save downloaded url contents
+ * @return array              retuns array
+*/
 function curlDownloadSource($url, $toSource)
 {
     $uri = parse_url($url);
@@ -411,30 +462,35 @@ function curlDownloadSource($url, $toSource)
     //Reformat url
     $currentUrl  = (empty($uri['scheme']) ? 'http': $uri['scheme']) . '://';
     $currentUrl .= empty($uri['host'])    ? '': $uri['host'];
+
+    if (isset($uri['port'])) {
+        $currentUrl .= ':' . $uri['port'];
+    }
+
     $currentUrl .= empty($uri['path'])    ? '/': $uri['path'];
     $currentUrl .= empty($uri['query'])   ? '': ('?' . $uri['query']);
 
     $ch = curl_init();
 
-    if (SSL_VERIFY_PEER === true) {
+    if (H2CP_SSL_VERIFY_PEER) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    } elseif (is_string(SSL_VERIFY_PEER)) {
-        if (is_file(SSL_VERIFY_PEER)) {
+    } elseif (is_string(H2CP_SSL_VERIFY_PEER)) {
+        if (is_file(H2CP_SSL_VERIFY_PEER)) {
             curl_close($ch);
-            return array('error' => 'Not found certificate: ' . SSL_VERIFY_PEER);
+            return array('error' => 'Not found certificate: ' . H2CP_SSL_VERIFY_PEER);
         }
 
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_CAINFO, SSL_VERIFY_PEER);
+        curl_setopt($ch, CURLOPT_CAINFO, H2CP_SSL_VERIFY_PEER);
     } else {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     }
 
-    curl_setopt($ch, CURLOPT_TIMEOUT, TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, H2CP_TIMEOUT);
     curl_setopt($ch, CURLOPT_URL, $currentUrl);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, MAX_LOOP);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, H2CP_MAX_LOOP);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 
@@ -494,9 +550,9 @@ function curlDownloadSource($url, $toSource)
 
 /**
  * download http request recursive (If found HTTP 3xx)
- * @param string $url               to download
- * @param resource $toSource        to download
- * @return array                    retuns array
+ * @param string   $url       url requested
+ * @param resource $toSource  save downloaded url contents
+ * @return array              retuns array
 */
 function downloadSource($url, $toSource, $caller)
 {
@@ -505,25 +561,23 @@ function downloadSource($url, $toSource, $caller)
 
     ++$caller;
 
-    if ($caller > MAX_LOOP) {
-        return array('error' => 'Limit of ' . MAX_LOOP . ' redirects was exceeded, maybe there is a problem: ' . $url);
+    if ($caller > H2CP_MAX_LOOP) {
+        return array('error' => 'Limit of ' . H2CP_MAX_LOOP . ' redirects was exceeded, maybe there is a problem: ' . $url);
     }
 
     $uri = parse_url($url);
     $secure = strcasecmp($uri['scheme'], 'https') === 0;
 
     if ($secure) {
-        $response = supportSSL();
-
-        if ($response !== true) {
-            return array('error' => $response);
+        if (supportSSL() === false) {
+            return array('error' => 'No SSL stream support detected');
         }
     }
 
-    $port = empty($uri['port']) ? ($secure === true ? 443 : 80) : ((int) $uri['port']);
+    $port = empty($uri['port']) ? ($secure ? 443 : 80) : ((int) $uri['port']);
     $host = ($secure ? 'ssl://' : '') . $uri['host'];
 
-    $fp = fsockopen($host, $port, $errno, $errstr, TIMEOUT);
+    $fp = fsockopen($host, $port, $errno, $errstr, H2CP_TIMEOUT);
 
     if ($fp === false) {
         return array('error' => 'SOCKET: ' . $errstr . '(' . $errno . ') - ' . $host . ':' . $port);
@@ -533,28 +587,28 @@ function downloadSource($url, $toSource, $caller)
                 empty($uri['path'])  ? '/' : $uri['path']
             ) . (
                 empty($uri['query']) ? '' : ('?' . $uri['query'])
-            ) . ' HTTP/1.0' . WOL . EOL
+            ) . ' HTTP/1.0' . H2CP_WOL . H2CP_EOL
         );
 
         if (isset($uri['user'])) {
             $auth = base64_encode($uri['user'] . ':' . (isset($uri['pass']) ? $uri['pass'] : ''));
-            fwrite($fp, 'Authorization: Basic ' . $auth . WOL . EOL);
+            fwrite($fp, 'Authorization: Basic ' . $auth . H2CP_WOL . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_ACCEPT'])) {
-            fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . WOL . EOL);
+            fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . H2CP_WOL . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_USER_AGENT'])) {
-            fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . WOL . EOL);
+            fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . H2CP_WOL . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_REFERER'])) {
-            fwrite($fp, 'Referer: ' . $_SERVER['HTTP_REFERER'] . WOL . EOL);
+            fwrite($fp, 'Referer: ' . $_SERVER['HTTP_REFERER'] . H2CP_WOL . H2CP_EOL);
         }
 
-        fwrite($fp, 'Host: ' . $uri['host'] . WOL . EOL);
-        fwrite($fp, 'Connection: close' . WOL . EOL . WOL . EOL);
+        fwrite($fp, 'Host: ' . $uri['host'] . H2CP_WOL . H2CP_EOL);
+        fwrite($fp, 'Connection: close' . H2CP_WOL . H2CP_EOL . H2CP_WOL . H2CP_EOL);
 
         $isRedirect = true;
         $isBody = false;
@@ -564,8 +618,8 @@ function downloadSource($url, $toSource, $caller)
         $data = '';
 
         while (false === feof($fp)) {
-            if (MAX_EXEC !== 0 && (time() - INIT_EXEC) >= MAX_EXEC) {
-                return array('error' => 'Maximum execution time of ' . (MAX_EXEC + 5) . ' seconds exceeded, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled)');
+            if (H2CP_MAX_EXEC !== 0 && (time() - H2CP_INIT_EXEC) >= H2CP_MAX_EXEC) {
+                return array('error' => 'Maximum execution time of ' . (H2CP_MAX_EXEC + 5) . ' seconds exceeded, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled)');
             }
 
             $data = fgets($fp);
@@ -644,7 +698,7 @@ function downloadSource($url, $toSource, $caller)
                     $isBody = true;
                     continue;
                 }
-            } elseif ($isRedirect === true) {
+            } elseif ($isRedirect) {
                 fclose($fp);
                 $data = '';
                 return array('error' => 'The response should be a redirect "' . $url . '", but did not inform which header "Localtion:"');
@@ -675,22 +729,22 @@ function downloadSource($url, $toSource, $caller)
     }
 }
 
-define('JSONP_CALLBACK', empty($_GET['callback']) ? false : $_GET['callback']);
-
 if (empty($_SERVER['HTTP_HOST'])) {
     $response = array('error' => 'The client did not send the Host header');
-} elseif (isset($_SERVER['SERVER_PORT']) === false) {
+} elseif (empty($_SERVER['SERVER_PORT'])) {
     $response = array('error' => 'The Server-proxy did not send the PORT (configure PHP)');
-} elseif (MAX_EXEC < 10) {
+} elseif (H2CP_MAX_EXEC < 10) {
     $response = array('error' => 'Execution time is less 15 seconds, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended time is 30 seconds or more');
-} elseif (MAX_EXEC <= TIMEOUT) {
-    $response = array('error' => 'The execution time is not configured enough to TIMEOUT in SOCKET, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended that the "max_execution_time =;" be a minimum of 5 seconds longer or reduce the TIMEOUT in "define(\'TIMEOUT\', ' . TIMEOUT . ');"');
+} elseif (H2CP_MAX_EXEC <= H2CP_TIMEOUT) {
+    $response = array('error' => 'The execution time is not configured enough to TIMEOUT in SOCKET, configure this with ini_set/set_time_limit or "php.ini" (if safe_mode is enabled), recommended that the "max_execution_time =;" be a minimum of 5 seconds longer or reduce the TIMEOUT in "define(\'H2CP_TIMEOUT\', ' . H2CP_TIMEOUT . ');"');
 } elseif (empty($_GET['url'])) {
     $response = array('error' => 'No such parameter "url"');
 } elseif (isHttpUrl($_GET['url']) === false) {
     $response = array('error' => 'Only http scheme and https scheme are allowed');
+} elseif (isAllowedUrl($_GET['url'], $message) === false) {
+    $response = array('error' => $message);
 } elseif (createFolder() === false) {
-    $err = getError();
+    $err = error_get_last();
     $response = array('error' => 'Can not create directory'. (
         $err !== null && empty($err['message']) ? '' : (': ' . $err['message'])
     ));
@@ -701,13 +755,13 @@ if (empty($_SERVER['HTTP_HOST'])) {
     $tmp = createTmpFile($_GET['url'], false);
 
     if ($tmp === false) {
-        $err = getError();
+        $err = error_get_last();
         $response = array('error' => 'Can not create file'. (
             $err !== null && empty($err['message']) ? '' : (': ' . $err['message'])
         ));
         $err = null;
     } else {
-        $response = PREFER_CURL && function_exists('curl_init') ?
+        $response = H2CP_PREFER_CURL && function_exists('curl_init') ?
                         curlDownloadSource($_GET['url'], $tmp['source']) :
                             downloadSource($_GET['url'], $tmp['source'], 0);
 
@@ -750,22 +804,22 @@ if (is_array($response) && false === empty($response['mime'])) {
                 $mime .= ';charset=' . JsonEncodeString($response['encode'], true);
             }
 
-            if (JSONP_CALLBACK === false) {
+            if (H2CP_JSONP === false) {
                 header('Content-Type: ' . $mime);
                 echo file_get_contents($locationFile);
-            } elseif (CROSS_DOMAIN === true) {
+            } elseif (H2CP_DATAURI) {
                 $tmp = $response = null;
 
                 header('Content-Type: application/javascript');
 
                 if (strpos($mime, 'image/svg') !== 0 && strpos($mime, 'image/') === 0) {
-                    echo JSONP_CALLBACK, '("data:', $mime, ';base64,',
+                    echo H2CP_JSONP, '("data:', $mime, ';base64,',
                         base64_encode(
                             file_get_contents($locationFile)
                         ),
                     '");';
                 } else {
-                    echo JSONP_CALLBACK, '("data:', $mime, ',',
+                    echo H2CP_JSONP, '("data:', $mime, ',',
                         asciiToInline(file_get_contents($locationFile)),
                     '");';
                 }
@@ -780,7 +834,7 @@ if (is_array($response) && false === empty($response['mime'])) {
                     $dir_name = '';
                 }
 
-                echo JSONP_CALLBACK, '(',
+                echo H2CP_JSONP, '(',
                     JsonEncodeString(
                         ($http_port === 443 ? 'https://' : 'http://') .
                         preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
@@ -800,18 +854,17 @@ if (is_array($response) && false === empty($response['mime'])) {
 }
 
 if (is_array($tmp) && isset($tmp['location']) && file_exists($tmp['location'])) {
-    //remove temporary file if an error occurred
+    // Remove temporary file if an error occurred
     unlink($tmp['location']);
 }
 
-//errors
-setHeaders(true);//no-cache
+setHeaders(true); // no-cache
 
 header('Content-Type: application/javascript');
 
 removeOldFiles();
 
-echo JSONP_CALLBACK, '(',
+echo H2CP_JSONP, '(',
     JsonEncodeString(
         'error: html2canvas-proxy-php: ' . $response['error']
     ),
