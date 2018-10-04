@@ -70,8 +70,8 @@ Definition | Description
 `define('H2CP_DATAURI', false);`                  | Enable use of "data URI scheme"
 `define('H2CP_PREFER_CURL', true);`               | Prefer curl if avaliable or disable
 `define('H2CP_SSL_VERIFY_PEER', false);`          | Set false for disable SSL checking or true for enable (require config PHP.INI with `curl.cainfo=/path/to/cacert.pem`). You can set path manualy like this: `define('H2CP_SSL_VERIFY_PEER', '/path/to/cacert.pem');`
-`define('H2CP_ALLOWED_DOMAINS', array( '*' ));`   | `*` allow all domains, for subdomains use like this `*.site.com`, for fixed domains use `array( 'site.com', 'www.site.com' )`
-`define('H2CP_ALLOWED_PORTS', array( 80, 443 ));` | Config allowed ports
+`define('H2CP_ALLOWED_DOMAINS', '*');`   | `*` allow all domains, for subdomains use like this `*.site.com`, for fixed domains use `, 'site.com,www.site.com'` (`string` separed by commas)
+`define('H2CP_ALLOWED_PORTS', '80,443');` | Config allowed ports (`string` separed by commas)
 
 ## Usage
 

@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 1.0.0
+ * html2canvas-php-proxy 1.1.0
  *
  * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -19,8 +19,8 @@ define('H2CP_MAX_LOOP', 10);                    // Configure loop limit for redi
 define('H2CP_DATAURI', false);                  // Enable use of "data URI scheme"
 define('H2CP_PREFER_CURL', true);               // Enable curl if avaliable or disable
 define('H2CP_SECPREFIX', 'h2cp_');              // Prefix temp filename
-define('H2CP_ALLOWED_DOMAINS', array( '*' ));   // * allow all domains, *.site.com for sub-domains, or fixed domains use array( 'site.com', 'www.site.com' )
-define('H2CP_ALLOWED_PORTS', array( 80, 443 )); // Allowed ports
+define('H2CP_ALLOWED_DOMAINS', '*');   // * allow all domains, *.site.com for sub-domains, or fixed domains use array( 'site.com', 'www.site.com' )
+define('H2CP_ALLOWED_PORTS', '80,443'); // Allowed ports
 
 /*
  * Set false for disable SSL check
@@ -347,7 +347,9 @@ function isHttpUrl($url)
 function isAllowedUrl($url, &$message) {
     $uri = parse_url($url);
 
-    if (in_array('*', H2CP_ALLOWED_DOMAINS) === false) {
+    $domains = array_map('trim', explode(',', H2CP_ALLOWED_DOMAINS));
+
+    if (in_array('*', $domains) === false) {
         $ok = false;
 
         foreach (H2CP_ALLOWED_DOMAINS as $domain) {
@@ -379,23 +381,10 @@ function isAllowedUrl($url, &$message) {
         $port = $uri['port'];
     }
 
-    $ok = false;
+    $ports = array_map('trim', explode(',', H2CP_ALLOWED_PORTS));
 
-    foreach (H2CP_ALLOWED_PORTS as $allowed_port) {
-        if ($port == $allowed_port) {
-            $ok = true;
-            break;
-        }
-    }
-
-    if ($ok) {
+    if (in_array($port, $ports)) {
         return true;
-    }
-
-    if (empty($uri['port'])) {
-        $port = strcasecmp('https', $uri['scheme']) === 0 ? 443 : 80;
-    } else {
-        $port = $uri['port'];
     }
 
     $message = '"' . $port . '" port is not allowed';
