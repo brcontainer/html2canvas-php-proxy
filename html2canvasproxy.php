@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 1.1.0
+ * html2canvas-php-proxy 1.1.1
  *
  * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -19,8 +19,9 @@ define('H2CP_MAX_LOOP', 10);                    // Configure loop limit for redi
 define('H2CP_DATAURI', false);                  // Enable use of "data URI scheme"
 define('H2CP_PREFER_CURL', true);               // Enable curl if avaliable or disable
 define('H2CP_SECPREFIX', 'h2cp_');              // Prefix temp filename
-define('H2CP_ALLOWED_DOMAINS', '*');   // * allow all domains, *.site.com for sub-domains, or fixed domains use array( 'site.com', 'www.site.com' )
-define('H2CP_ALLOWED_PORTS', '80,443'); // Allowed ports
+define('H2CP_ALLOWED_DOMAINS', '*');            // * allow all domains, *.site.com for sub-domains, or fixed domains use `define('H2CP_ALLOWED_DOMAINS', 'site.com,www.site.com' )
+define('H2CP_ALLOWED_PORTS', '80,443');         // Allowed ports
+define('H2CP_ALTERNATIVE', 'console.log');      // callback alternative
 
 /*
  * Set false for disable SSL check
@@ -130,13 +131,13 @@ function checkContentType($content)
     $content = strtolower($content);
     $encode = null;
 
-    if (preg_match('#[;](\s|)+charset[=]#', $content) === 1) {
-        $encode = preg_split('#[;](\s|)+charset[=]#', $content);
+    if (preg_match('#[;](\\s+)?charset[=]#', $content) === 1) {
+        $encode = preg_split('#[;](\\s+)?charset[=]#', $content);
         $encode = empty($encode[1]) ? null : trim($encode[1]);
     }
 
     $mime = trim(
-        preg_replace('/[;]([\\s\\S]|)+$/', '',
+        preg_replace('#[;](.*)?$#', '',
             str_replace('content-type:', '',
                 str_replace('/x-', '/', $content)
             )
@@ -253,7 +254,7 @@ function relativeToAbsolute($url, $relative)
     if (preg_match('#^[a-z0-9]+[:]#i', $relative) !== 0) {
         $pu = parse_url($relative);
 
-        if (preg_match('#^(http|https)$#i', $pu['scheme']) === 0) {
+        if (preg_match('#^https?$#i', $pu['scheme']) === 0) {
             return '';
         }
 
@@ -284,7 +285,7 @@ function relativeToAbsolute($url, $relative)
     $pm = parse_url('http://1/' . $relative);
     $pm['path'] = isset($pm['path']) ? $pm['path'] : '';
 
-    $isPath = $pm['path'] !== '' && strpos(strrev($pm['path']), '/') === 0 ? true : false;
+    $isPath = $pm['path'] !== '' && strpos(strrev($pm['path']), '/') === 0;
 
     if (strpos($relative, '/') === 0) {
         $pu['path'] = '';
@@ -336,7 +337,7 @@ function relativeToAbsolute($url, $relative)
 */
 function isHttpUrl($url)
 {
-    return preg_match('#^http(|s)[:][/][/][a-z0-9]#i', $url) === 1;
+    return preg_match('#^https?[:]//.#i', $url) === 1;
 }
 
 /**
@@ -352,7 +353,7 @@ function isAllowedUrl($url, &$message) {
     if (in_array('*', $domains) === false) {
         $ok = false;
 
-        foreach (H2CP_ALLOWED_DOMAINS as $domain) {
+        foreach ($domains as $domain) {
             if ($domain === $uri['host']) {
                 $ok = true;
                 break;
@@ -413,7 +414,7 @@ function createFolder()
 */
 function createTmpFile($basename, $isEncode)
 {
-    $folder = preg_replace('#[/]$#', '', H2CP_PATH) . '/';
+    $folder = preg_replace('#/$#', '', H2CP_PATH) . '/';
 
     if ($isEncode === false) {
         $basename = H2CP_SECPREFIX . strlen($basename) . '.' . sha1($basename);
@@ -426,7 +427,7 @@ function createTmpFile($basename, $isEncode)
         return createTmpFile($basename, true);
     }
 
-    $source = fopen($folder . $basename . $tmpMime, 'w');
+    $source = fopen($folder . $basename . $tmpMime, 'wb');
 
     if ($source !== false) {
         return array(
@@ -450,14 +451,14 @@ function curlDownloadSource($url, $toSource)
 
     //Reformat url
     $currentUrl  = (empty($uri['scheme']) ? 'http': $uri['scheme']) . '://';
-    $currentUrl .= empty($uri['host'])    ? '': $uri['host'];
+    $currentUrl .= empty($uri['host']) ? '': $uri['host'];
 
     if (isset($uri['port'])) {
         $currentUrl .= ':' . $uri['port'];
     }
 
-    $currentUrl .= empty($uri['path'])    ? '/': $uri['path'];
-    $currentUrl .= empty($uri['query'])   ? '': ('?' . $uri['query']);
+    $currentUrl .= empty($uri['path']) ? '/': $uri['path'];
+    $currentUrl .= empty($uri['query']) ? '': ('?' . $uri['query']);
 
     $ch = curl_init();
 
@@ -618,7 +619,7 @@ function downloadSource($url, $toSource, $caller)
             }
 
             if ($isHttp === false) {
-                if (preg_match('#^HTTP[/]1[.]#i', $data) === 0) {
+                if (preg_match('#^HTTP/1\.#i', $data) === 0) {
                     fclose($fp);//Close connection
                     $data = '';
                     return array('error' => 'This request did not return a HTTP response valid');
@@ -633,7 +634,7 @@ function downloadSource($url, $toSource, $caller)
                     $data = '';
                     return array('error' => 'Request returned HTTP_304, this status code is incorrect because the html2canvas not send Etag');
                 } else {
-                    $isRedirect = preg_match('#^(301|302|303|307|308)$#', $tmp) !== 0;
+                    $isRedirect = preg_match('#^3\\d{2}$#', $tmp) !== 0;
 
                     if ($isRedirect === false && $tmp !== '200') {
                         fclose($fp);
@@ -669,11 +670,11 @@ function downloadSource($url, $toSource, $caller)
                     }
 
                     return downloadSource($data, $toSource, $caller);
-                } elseif (preg_match('#^content[-]length[:]( 0|0)$#i', $data) !== 0) {
+                } elseif (preg_match('#^content-length[:](\\s)?0$#i', $data) !== 0) {
                     fclose($fp);
                     $data = '';
                     return array('error' => 'source is blank (Content-length: 0)');
-                } elseif (preg_match('#^content[-]type[:]#i', $data) !== 0) {
+                } elseif (preg_match('#^content-type[:]#i', $data) !== 0) {
                     $response = checkContentType($data);
 
                     if (isset($response['error'])) {
@@ -826,7 +827,7 @@ if (is_array($response) && false === empty($response['mime'])) {
                 echo H2CP_JSONP, '(',
                     JsonEncodeString(
                         ($http_port === 443 ? 'https://' : 'http://') .
-                        preg_replace('#:[0-9]+$#', '', $_SERVER['HTTP_HOST']) .
+                        preg_replace('#[:]\\d+$#', '', $_SERVER['HTTP_HOST']) .
                         ($http_port === 80 || $http_port === 443 ? '' : (
                             ':' . $_SERVER['SERVER_PORT']
                         )) .
@@ -853,7 +854,9 @@ header('Content-Type: application/javascript');
 
 removeOldFiles();
 
-echo H2CP_JSONP, '(',
+$callback = H2CP_JSONP !== false ? H2CP_ALTERNATIVE;
+
+echo $callback, '(',
     JsonEncodeString(
         'error: html2canvas-proxy-php: ' . $response['error']
     ),
