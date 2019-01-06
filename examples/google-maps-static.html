@@ -1,72 +1,101 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Google Maps static and html2canvas</title>
-        <style type="text/css">
-        #static_map {
-            background-color: #ccc;
-            padding: 5px;
-            display: inline-block;
-        }
-        #static_map > img {
-            border: 1px #c0c0c0 solid;
-            width: 600px;
-            height: 300px;
-        }
-        </style>
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
-        <script type="text/javascript">
-        window.onload = function () {
-            function convert(target) {
-                html2canvas(target, {
-                    "proxy": "../html2canvasproxy.php",
-                    "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-                    "onrendered": function(canvas) {
-                        var img = new Image();
-                            img.onload = function () {
-                                img.onload = null;
-                                document.getElementById("output").appendChild(img);
-                            };
-                            img.src = canvas.toDataURL("image/png");
-                    }
-                });
-            }
+<head>
+    <meta charset="utf-8">
+    <title>Google Maps static and html2canvas</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+    #static_map {
+        background-color: #ccc;
+        padding: 5px;
+        display: inline-block;
+    }
+    #static_map > img {
+        border: 1px #c0c0c0 solid;
+        width: 600px;
+        height: 300px;
+    }
 
-            document.getElementById("save1").onclick = function () {
-                convert(document.getElementById("static_map"));
-            };
+    .note {
+        color: #fff;
+        padding: 25px;
+        background: #2fa9f6;
+        box-shadow: inset 1px 1px 2px rgba(0,0,0,.1), 1px 1px 1px rgba(255,255,255,.1);
+    }
+    .note a {
+        color: inherit;
+    }
 
-            document.getElementById("save2").onclick = function () {
-                convert(document.getElementById("container"));
-            };
+    code {
+        padding: .2em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(0,0,0,.04);
+        border-radius: 3px;
+    }
+    </style>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <script>
+    window.onload = function () {
+        function convert(target) {
+            html2canvas(target, {
+                "proxy": "../html2canvasproxy.php",
+                "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                "onrendered": function(canvas) {
+                    var img = new Image;
+
+                    img.onload = function () {
+                        img.onload = null;
+                        document.getElementById("output").appendChild(img);
+                    };
+
+                    img.onerror = function() {
+                        img.onerror = null;
+                        if(window.console.log) {
+                            window.console.log("Not loaded image from canvas.toDataURL");
+                        } else {
+                            alert("Not loaded image from canvas.toDataURL");
+                        }
+                    };
+
+                    img.src = canvas.toDataURL("image/png");
+                }
+            });
+        }
+
+        document.getElementById("save1").onclick = function () {
+            convert(document.getElementById("static_map"));
         };
-        </script>
-    </head>
-    <body>
-        <h1>Google Maps static and html2canvas</h1>
-        <p>Tested on Chrome and Firefox</p>
-        <p>
-            <strong>REQUIRES API KEY</strong>,
-            obtain in: https://developers.google.com/maps/documentation/javascript/get-api-key
-        </p>
 
-        <div id="container">
-            <h2>Maps example:</h2>
-            <div id="static_map">
-                <img src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&amp;zoom=13&amp;size=600x300&amp;maptype=roadmap
-&amp;markers=color:blue%7Clabel:S%7C40.702147,-74.015794&amp;markers=color:green%7Clabel:G%7C40.711614,-74.012318
-&amp;markers=color:red%7Clabel:C%7C40.718217,-73.998284
-&amp;key=YOUR_API_KEY">
-            </div>
-            <div>
-                <button id="save1">Save #map_canvas</button>
-                <button id="save2">Save #container</button>
-            </div>
-        </div>
+        document.getElementById("save2").onclick = function () {
+            convert(document.getElementById("container"));
+        };
+    };
+    </script>
+</head>
+<body>
+    <h1>Google Maps static and html2canvas</h1>
 
-        <div id="output">
-            <h1>Output results:</h1>
+    <p>Tested on Chrome and Firefox</p>
+
+    <p class="note">
+        <strong>Note:</strong> for use this example you needs replace <code>YOUR_API_KEY</code> in <code>&lt;img&gt;</code> by your "api key" from "google dev"</strong>, for obtain a "api key" access: <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>
+    </p>
+
+    <div id="container">
+        <h2>Maps example:</h2>
+        <div id="static_map">
+            <img src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&amp;zoom=13&amp;size=600x300&amp;maptype=roadmap&amp;markers=color:blue%7Clabel:S%7C40.702147,-74.015794&ampmarkers=color:green%7Clabel:G%7C40.711614,-74.012318&amp;markers=color:red%7Clabel:C%7C40.718217,-73.998284&amp;key=YOUR_API_KEY">
         </div>
-    </body>
+        <div>
+            <button id="save1">Save #map_canvas</button>
+            <button id="save2">Save #container</button>
+        </div>
+    </div>
+
+    <div id="output">
+        <h1>Output results:</h1>
+    </div>
+</body>
 </html>

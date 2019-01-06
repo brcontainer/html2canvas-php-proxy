@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><style>body {
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body {
   max-width: 980px;
   border: 1px solid #ddd;
   outline: 1300px solid #fff;
@@ -841,7 +841,7 @@ body .markdown-body
     inset 0 -12px 0 rgba(0, 0, 0, .05);
 }
 
-/* Multimarkdown Critic Blocks */
+/* MultiMarkdown Critic Blocks */
 .markdown-body .critic_mark {
   background: #ff0;
 }
@@ -992,7 +992,7 @@ body .markdown-body
     page-break-after: avoid;
   }
 }
-</style><style>/*github*/
+</style><style>/*GitHub*/
 .codehilite {background-color:#fff;color:#333333;}
 .codehilite .hll {background-color:#ffffcc;}
 .codehilite .c{color:#999988;font-style:italic}
@@ -1055,7 +1055,7 @@ body .markdown-body
 .codehilite .vi{color:teal}
 .codehilite .il{color:#009999}
 .codehilite .gc{color:#999;background-color:#EAF2F5}
-</style><title>README</title></head><body><article class="markdown-body"><h2 id="html2canvas-php-proxy-100">html2canvas-php-proxy 1.0.0<a class="headerlink" href="#html2canvas-php-proxy-100" title="Permanent link"></a></h2>
+</style><title>README</title></head><body><article class="markdown-body"><h2 id="html2canvas-php-proxy">html2canvas-php-proxy<a class="headerlink" href="#html2canvas-php-proxy" title="Permanent link"></a></h2>
 <h2 id="php-proxy-html2canvas">PHP Proxy html2canvas<a class="headerlink" href="#php-proxy-html2canvas" title="Permanent link"></a></h2>
 <p>This script allows you to use <strong>html2canvas.js</strong> with different servers, ports and protocols (http, https),
 preventing to occur &ldquo;tainted&rdquo; when exporting the <code>&lt;canvas&gt;</code> for image.</p>
@@ -1139,12 +1139,12 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 <td>Set false for disable SSL checking or true for enable (require config PHP.INI with <code>curl.cainfo=/path/to/cacert.pem</code>). You can set path manualy like this: <code>define('H2CP_SSL_VERIFY_PEER', '/path/to/cacert.pem');</code></td>
 </tr>
 <tr>
-<td><code>define('H2CP_ALLOWED_DOMAINS', array( '*' ));</code></td>
-<td><code>*</code> allow all domains, for subdomains use like this <code>*.site.com</code>, for fixed domains use <code>array( 'site.com', 'www.site.com' )</code></td>
+<td><code>define('H2CP_ALLOWED_DOMAINS', '*');</code></td>
+<td><code>*</code> allow all domains, for subdomains use like this <code>*.site.com</code>, for fixed domains use <code>, 'site.com,www.site.com'</code> (<code>string</code> separed by commas)</td>
 </tr>
 <tr>
-<td><code>define('H2CP_ALLOWED_PORTS', array( 80, 443 ));</code></td>
-<td>Config allowed ports</td>
+<td><code>define('H2CP_ALLOWED_PORTS', '80,443');</code></td>
+<td>Config allowed ports (<code>string</code> separed by commas)</td>
 </tr>
 </tbody>
 </table>
@@ -1201,12 +1201,12 @@ for a new image, a security error occurs (actually occurs is a security lock), w
 
 <h2 id="using-web-console">Using Web Console<a class="headerlink" href="#using-web-console" title="Permanent link"></a></h2>
 <p>If you have any problems with the script recommend to analyze the log use the Web Console from your browser:
-<em> Firefox: <a href="https://developer.mozilla.org/en-US/docs/Tools/Browser_Console">https://developer.mozilla.org/en-US/docs/Tools/Browser_Console</a>
-</em> Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/console">https://developers.google.com/chrome-developer-tools/docs/console</a>
+* Firefox: <a href="https://developer.mozilla.org/en-US/docs/Tools/Browser_Console">https://developer.mozilla.org/en-US/docs/Tools/Browser_Console</a>
+* Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/console">https://developers.google.com/chrome-developer-tools/docs/console</a>
 * InternetExplorer: <a href="http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/gg589530%28v=vs.85%29.aspx</a></p>
 <p>Get NetWork results:
-<em> Firefox: <a href="https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/">https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/</a>
-</em> Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/network">https://developers.google.com/chrome-developer-tools/docs/network</a>
+* Firefox: <a href="https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/">https://hacks.mozilla.org/2013/05/firefox-developer-tool-features-for-firefox-23/</a>
+* Chrome: <a href="https://developers.google.com/chrome-developer-tools/docs/network">https://developers.google.com/chrome-developer-tools/docs/network</a>
 * InternetExplorer: <a href="http://msdn.microsoft.com/en-us/library/gg130952%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/gg130952%28v=vs.85%29.aspx</a></p>
 <p>An alternative is to diagnose problems accessing the link directly:</p>
 <p><code>http://[DOMAIN]/[PATH]/html2canvasproxy.php?url=http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fstaticmap%3Fcenter%3D40.714728%2C-73.998672%26zoom%3D12%26size%3D800x600%26maptype%3Droadmap%26sensor%3Dfalse%261&amp;callback=html2canvas_0</code></p>

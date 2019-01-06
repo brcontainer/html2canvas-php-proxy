@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 1.1.1
+ * html2canvas-php-proxy 1.1.2
  *
  * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -854,7 +854,7 @@ header('Content-Type: application/javascript');
 
 removeOldFiles();
 
-$callback = H2CP_JSONP !== false ? H2CP_ALTERNATIVE;
+$callback = H2CP_JSONP !== false ? H2CP_JSONP : H2CP_ALTERNATIVE;
 
 echo $callback, '(',
     JsonEncodeString(
