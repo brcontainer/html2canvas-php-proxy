@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 1.1.3
+ * html2canvas-php-proxy 1.1.4
  *
  * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -32,7 +32,6 @@ define('H2CP_SSL_VERIFY_PEER', false);
 
 // Constants (don't change)
 define('H2CP_EOL', chr(10));
-define('H2CP_WOL', chr(13));
 define('H2CP_GMDATECACHE', gmdate('D, d M Y H:i:s'));
 define('H2CP_INIT_EXEC', time());
 
@@ -66,7 +65,6 @@ function asciiToInline($str)
     if ($translate === null) {
         $translate = array(
             H2CP_EOL => '%0A',
-            H2CP_WOL => '%0D',
             ' ' => '%20',
             '"' => '%22',
             '#' => '%23',
@@ -77,7 +75,8 @@ function asciiToInline($str)
             '?' => '%3F',
             chr(0) => '%00',
             chr(8) => '',
-            chr(9) => '%09'
+            chr(9) => '%09',
+            chr(13) => '%0D'
         );
     }
 
@@ -582,28 +581,28 @@ function downloadSource($url, $toSource, $caller)
                 empty($uri['path'])  ? '/' : $uri['path']
             ) . (
                 empty($uri['query']) ? '' : ('?' . $uri['query'])
-            ) . ' HTTP/1.0' . H2CP_WOL . H2CP_EOL
+            ) . ' HTTP/1.0' . H2CP_EOL
         );
 
         if (isset($uri['user'])) {
             $auth = base64_encode($uri['user'] . ':' . (isset($uri['pass']) ? $uri['pass'] : ''));
-            fwrite($fp, 'Authorization: Basic ' . $auth . H2CP_WOL . H2CP_EOL);
+            fwrite($fp, 'Authorization: Basic ' . $auth . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_ACCEPT'])) {
-            fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . H2CP_WOL . H2CP_EOL);
+            fwrite($fp, 'Accept: ' . $_SERVER['HTTP_ACCEPT'] . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_USER_AGENT'])) {
-            fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . H2CP_WOL . H2CP_EOL);
+            fwrite($fp, 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'] . H2CP_EOL);
         }
 
         if (false === empty($_SERVER['HTTP_REFERER'])) {
-            fwrite($fp, 'Referer: ' . $_SERVER['HTTP_REFERER'] . H2CP_WOL . H2CP_EOL);
+            fwrite($fp, 'Referer: ' . $_SERVER['HTTP_REFERER'] . H2CP_EOL);
         }
 
-        fwrite($fp, 'Host: ' . $uri['host'] . H2CP_WOL . H2CP_EOL);
-        fwrite($fp, 'Connection: close' . H2CP_WOL . H2CP_EOL . H2CP_WOL . H2CP_EOL);
+        fwrite($fp, 'Host: ' . $uri['host'] . H2CP_EOL);
+        fwrite($fp, 'Connection: close' . H2CP_EOL . H2CP_EOL);
 
         $isRedirect = true;
         $isBody = false;
