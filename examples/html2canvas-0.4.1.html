@@ -24,15 +24,16 @@
 </head>
 <body>
     <div id="container">
-        <h1>html2canvas 0.4.1 with PHP proxy</h1>
+        <h1>html2canvas 1.x with PHP proxy</h1>
+
+        <p>
+            From imgur.com: <br>
+            <img alt="google maps static" src="http://i.stack.imgur.com/BOzy5.png?s=128&g=1">
+        </p>
 
         <p>
             From githubusercontent.com: <br>
-            <img alt="google maps static" src="https://avatars1.githubusercontent.com/u/4368952?v=2&amp;s=40">
-        </p>
-        <p>
-            From facebook.com (with http redirect): <br>
-            <img alt="facebook image redirect" src="https://graph.facebook.com/366239146811715/picture">
+            <img alt="google maps static" src="https://avatars3.githubusercontent.com/u/18756527?s=400&u=008029f39e5f4e9f5420a0e9582c91232bd72292&v=4">
         </p>
     </div>
 
@@ -43,27 +44,29 @@
     </div>
 
     <script>
-    html2canvas(document.getElementById("container"), {
-        "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-        "proxy": "jsonp-proxy.php",
-        "onrendered": function (canvas) {
-            var img = new Image;
+    window.onload = function () {
+        html2canvas(document.getElementById("container"), {
+            "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+            "proxy": "proxy.php",
+            "onrendered": function (canvas) {
+                var img = new Image;
 
-            img.onload = function () {
-                img.onload = null;
+                img.onload = function () {
+                    img.onload = null;
 
-                document.getElementById("output").appendChild(img);
-            };
+                    document.getElementById("output").appendChild(img);
+                };
 
-            img.onerror = function () {
-                img.onerror = null;
+                img.onerror = function () {
+                    img.onerror = null;
 
-                console.log("Not loaded image from canvas.toDataURL");
-            };
+                    console.log("Not loaded image from canvas.toDataURL");
+                };
 
-            img.src = canvas.toDataURL("image/png");
-        }
-    });
+                img.src = canvas.toDataURL("image/png");
+            }
+        });
+    };
     </script>
 </body>
 </html>
