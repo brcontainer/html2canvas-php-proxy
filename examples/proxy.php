@@ -1,5 +1,10 @@
 <?php
 
+register_shutdown_function(function () {
+    echo "\n", round(memory_get_peak_usage() / 1024 / 1024, 2), 'MB de memoria ram/virtual';
+});
+
+
 use Inphinit\CrossDomainProxy\Proxy;
 
 //Usage without autoload
@@ -18,7 +23,3 @@ require '../src/Exception/TimeoutException.php';
 
 $proxy = new Proxy('https://www.google.com.br');
 $proxy->jsonp('teste');
-
-register_shutdown_function(function () {
-    echo "\n", round(memory_get_peak_usage() / 1024 / 1024, 2), 'MB de memoria ram/virtual';
-});
