@@ -15,9 +15,9 @@ class Proxy
     private $timeout = 30;
     private $maxRedirs = 5;
     private $certificateAuthority;
+    private $nonSecure = false;
     private $headers = array();
     private $allowedUrls = array('*');
-    private $nonSecure = false;
 
     private static $secureSupported;
 
@@ -60,6 +60,15 @@ class Proxy
         return $this->certificateAuthority;
     }
 
+    public function nonSecureAllowed($allow = null)
+    {
+        if ($allow === null) {
+            return $this->nonSecure;
+        }
+
+        $this->nonSecure = $allow === true;
+    }
+
     public function setHeader($header, $value)
     {
         $header = strtolower($header);
@@ -99,15 +108,6 @@ class Proxy
                 $this->allowedUrls = array('*');
             }
         }
-    }
-
-    public function nonSecureAllowed($allow = null)
-    {
-        if ($allow === null) {
-            return $this->nonSecure;
-        }
-
-        $this->nonSecure = $allow === true;
     }
 
     public function curl($prefer = null)
