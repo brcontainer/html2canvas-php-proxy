@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>html2canvas 0.4.1 with PHP proxy</title>
+    <title>html2canvas 1.x with PHP proxy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
@@ -20,7 +20,7 @@
     }
     </style>
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.7/dist/html2canvas.min.js"></script>
 </head>
 <body>
     <div id="container">
@@ -47,24 +47,23 @@
     window.onload = function () {
         html2canvas(document.getElementById("container"), {
             "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-            "proxy": "../html2canvasproxy.php",
-            "onrendered": function (canvas) {
-                var img = new Image;
+            "proxy": "../html2canvasproxy.php"
+        }).then(function(canvas) {
+            var img = new Image();
 
-                img.onload = function () {
-                    img.onload = null;
+            img.onload = function () {
+                img.onload = null;
 
-                    document.getElementById("output").appendChild(img);
-                };
+                document.getElementById("output").appendChild(img);
+            };
 
-                img.onerror = function () {
-                    img.onerror = null;
+            img.onerror = function () {
+                img.onerror = null;
 
-                    console.log("Not loaded image from canvas.toDataURL");
-                };
+                console.log("Not loaded image from canvas.toDataURL");
+            };
 
-                img.src = canvas.toDataURL("image/png");
-            }
+            img.src = canvas.toDataURL("image/png");
         });
     };
     </script>
