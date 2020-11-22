@@ -1,11 +1,11 @@
 <?php
 namespace Inphinit\CrossDomainProxy\Service;
 
-use Inphinit\CrossDomainProxy\Proxy;
+use Inphinit\CrossDomainProxy\Exception\ConnectionException;
+use Inphinit\CrossDomainProxy\Exception\HttpException;
+use Inphinit\CrossDomainProxy\Exception\TimeoutException;
 
-use Inphinit\CrossDomainProxy\ConnectionException;
-use Inphinit\CrossDomainProxy\HttpException;
-use Inphinit\CrossDomainProxy\TimeoutException;
+use Inphinit\CrossDomainProxy\Proxy;
 
 class CurlService
 {
@@ -34,8 +34,15 @@ class CurlService
 
         curl_setopt($ch, CURLOPT_FILE, $this->temp);
 
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_CAINFO, $this->proxy->getCertificateAuthority());
+        if ($uri->scheme === 'https') {
+            if ($this->proxy->nonSecureAllowed()) {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            } else {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_CAINFO, $this->proxy->getCertificateAuthority());
+            }
+        }
 
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->proxy->getTimeout());
         curl_setopt($ch, CURLOPT_MAXREDIRS, $this->proxy->getMaxRedirs());

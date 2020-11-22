@@ -3,23 +3,26 @@ namespace Inphinit\CrossDomainProxy;
 
 class Proxy
 {
+    private $preferCurl = true;
+    private $dataUri = false;
     private $path = 'cache';
     private $cache = 300000;
     private $timeout = 30;
     private $maxRedirs = 5;
-    private $dataUri = false;
-    private $preferCurl = true;
-    private $tempPrefix = 'inph_';
-    private $allowedDomains = array('*');
-    private $allowedPorts = array(80, 443);
+    private $certificateAuthority;
     private $headers = array();
-    private $caInfo;
+    private $allowedUrls = array('*');
+    private $nonSecure = false;
 
     private $secureSupported;
 
     public function __construct($url, $timeout = null)
     {
         $this->url = $url;
+
+        if ($timeout) {
+            $this->timeout = $timeout;
+        }
     }
 
     public function getUrl()
@@ -44,7 +47,6 @@ class Proxy
 
     public function setCertificateAuthority($cainfo)
     {
-        //'C:/openssl/cert/cacert.pem'
         $this->certificateAuthority = $cainfo;
     }
 
@@ -67,15 +69,46 @@ class Proxy
         return $this->headers;
     }
 
+    public function addURLPattern($pattern)
+    {
+        if ($pattern === '*') {
+            $this->allowedUrls = array('*');
+        } else {
+            $this->allowedUrls[] = array($pattern);
+        }
+    }
+
+    public function removeURLPattern($pattern)
+    {
+        $pos = array_search($pattern, $this->allowedUrls);
+
+        if ($pos !== false) {
+            $this->allowedUrls = array_slice($this->allowedUrls, $pos, 1, true);
+
+            if (count($this->allowedUrls) === 0) {
+                $this->allowedUrls = array('*');
+            }
+        }
+    }
+
+    public function nonSecureAllowed($allow = null)
+    {
+        if ($allow === null) {
+            return $this->nonSecure;
+        }
+
+        $this->nonSecure = $allow === true;
+    }
+
     public static function secureSupport()
     {
         //Array ( [0] => tcp [1] => udp [2] => ssl [3] => tls [4] => tlsv1.0 [5] => tlsv1.1 [6] => tlsv1.2 )
 
         if (self::$secureSupported !== null) {
-            return self::$secureSupported;
+            self::$secureSupported = in_array('ssl', \stream_get_transports());
         }
 
-        return self::$secureSupported = in_array('ssl', \stream_get_transports());
+        return self::$secureSupported;
     }
 
     public static function parseUri($url)

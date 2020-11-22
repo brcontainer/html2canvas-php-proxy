@@ -1,11 +1,11 @@
 <?php
 namespace Inphinit\CrossDomainProxy\Service;
 
-use Inphinit\CrossDomainProxy\Proxy;
+use Inphinit\CrossDomainProxy\Exception\ConnectionException;
+use Inphinit\CrossDomainProxy\Exception\HttpException;
+use Inphinit\CrossDomainProxy\Exception\TimeoutException;
 
-use Inphinit\CrossDomainProxy\ConnectionException;
-use Inphinit\CrossDomainProxy\HttpException;
-use Inphinit\CrossDomainProxy\TimeoutException;
+use Inphinit\CrossDomainProxy\Proxy;
 
 class NativeService
 {
