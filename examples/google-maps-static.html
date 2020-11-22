@@ -34,45 +34,22 @@
         background-color: rgba(0,0,0,.04);
         border-radius: 3px;
     }
+
+    #output {
+        margin: .5em;
+        padding: .5em;
+        border-radius: .2em;
+        background: #cfcfcf;
+    }
+
+    #output > img {
+        margin: .5em;
+        background: #fff;
+        box-shadow: 2px 2px 5px rgba(0,0,0,.5);
+    }
     </style>
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
-    <script>
-    window.onload = function () {
-        function convert(target) {
-            html2canvas(target, {
-                "proxy": "../html2canvasproxy.php",
-                "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-                "onrendered": function(canvas) {
-                    var img = new Image;
-
-                    img.onload = function () {
-                        img.onload = null;
-                        document.getElementById("output").appendChild(img);
-                    };
-
-                    img.onerror = function() {
-                        img.onerror = null;
-                        if(window.console.log) {
-                            window.console.log("Not loaded image from canvas.toDataURL");
-                        } else {
-                            alert("Not loaded image from canvas.toDataURL");
-                        }
-                    };
-
-                    img.src = canvas.toDataURL("image/png");
-                }
-            });
-        }
-
-        document.getElementById("save1").onclick = function () {
-            convert(document.getElementById("static_map"));
-        };
-
-        document.getElementById("save2").onclick = function () {
-            convert(document.getElementById("container"));
-        };
-    };
-    </script>
 </head>
 <body>
     <h1>Google Maps static and html2canvas</h1>
@@ -94,8 +71,44 @@
         </div>
     </div>
 
+    <hr>
+
     <div id="output">
-        <h1>Output results:</h1>
+        <h2>Output results:</h2>
     </div>
+
+    <script>
+    function convert(target) {
+        html2canvas(target, {
+            "proxy": "proxy.php",
+            "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+            "onrendered": function (canvas) {
+                var img = new Image;
+
+                img.onload = function () {
+                    img.onload = null;
+
+                    document.getElementById("output").appendChild(img);
+                };
+
+                img.onerror = function () {
+                    img.onerror = null;
+
+                    console.log("Not loaded image from canvas.toDataURL");
+                };
+
+                img.src = canvas.toDataURL("image/png");
+            }
+        });
+    }
+
+    document.getElementById("save1").onclick = function () {
+        convert(document.getElementById("static_map"));
+    };
+
+    document.getElementById("save2").onclick = function () {
+        convert(document.getElementById("container"));
+    };
+    </script>
 </body>
 </html>

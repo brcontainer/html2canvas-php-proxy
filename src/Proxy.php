@@ -143,6 +143,15 @@ class Proxy
 
     public function output()
     {
+        if (isset($_GET['callback'])) {
+            return $this->jsonp($_GET['callback']);
+        } else {
+            return $this->resource();
+        }
+    }
+
+    public function resource()
+    {
         $this->service();
     }
 
