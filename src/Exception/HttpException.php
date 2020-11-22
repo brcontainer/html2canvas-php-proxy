@@ -1,7 +1,7 @@
 <?php
-namespace Inphinit\CrossDomainProxy;
+namespace Inphinit\CrossDomainProxy\Exception;
 
-class HttpException extends BaseException
+class HttpException extends CoreException
 {
     protected $code = 500;
 }

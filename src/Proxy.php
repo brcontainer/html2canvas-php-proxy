@@ -1,9 +1,14 @@
 <?php
 namespace Inphinit\CrossDomainProxy;
 
+use Inphinit\CrossDomainProxy\Exception\CoreException;
+
+use Inphinit\CrossDomainProxy\Service\CurlService;
+use Inphinit\CrossDomainProxy\Service\NativeService;
+
 class Proxy
 {
-    private $preferCurl = true;
+    private $preferCurl = false;
     private $dataUri = false;
     private $path = 'cache';
     private $cache = 300000;
@@ -14,7 +19,7 @@ class Proxy
     private $allowedUrls = array('*');
     private $nonSecure = false;
 
-    private $secureSupported;
+    private static $secureSupported;
 
     public function __construct($url, $timeout = null)
     {
@@ -64,6 +69,11 @@ class Proxy
         }
     }
 
+    public function getTemp()
+    {
+        return fopen('php://temp', 'w');
+    }
+
     public function getHeaders()
     {
         return $this->headers;
@@ -100,32 +110,70 @@ class Proxy
         $this->nonSecure = $allow === true;
     }
 
+    public function curl($prefer = null)
+    {
+        if ($prefer === null) {
+            return $this->preferCurl;
+        }
+
+        $this->preferCurl = $prefer === true;
+    }
+
     public static function secureSupport()
     {
         //Array ( [0] => tcp [1] => udp [2] => ssl [3] => tls [4] => tlsv1.0 [5] => tlsv1.1 [6] => tlsv1.2 )
 
-        if (self::$secureSupported !== null) {
+        if (self::$secureSupported === null) {
             self::$secureSupported = in_array('ssl', \stream_get_transports());
         }
 
         return self::$secureSupported;
     }
 
-    public static function parseUri($url)
+    private function service()
     {
-        if (self::$uri === null) {
-            $uri = parse_url($url);
-
-            if (isset($uri['user'])) {
-                $uri['authorization'] = base64_encode($uri['user'] . ':' . (isset($uri['pass']) ? $uri['pass'] : ''));
-            }
-
-            $uri['path'] = empty($uri['path'])  ? '/' : $uri['path'];
-            $uri['query'] = empty($uri['query']) ? '' : ('?' . $uri['query']);
-
-            self::$uri = (\strClass) $uri;
+        if ($this->preferCurl && function_exists('curl_init')) {
+            $service = new CurlService($this);
+        } else {
+            $service = new NativeService($this);
         }
 
-        return self::$uri;
+        $service->get();
+    }
+
+    public function output()
+    {
+        $this->service();
+    }
+
+    public function jsonp($callback = null)
+    {
+        if ($callback === null) {
+            $callback = $_GET['callback'];
+        }
+
+        if (ctype_print($callback) === false) {
+            throw new CoreException('Invalid callback');
+        }
+
+        $this->service();
+    }
+
+    public static function parseUri($url)
+    {
+        $uri = parse_url($url);
+
+        if (isset($uri['user'])) {
+            $uri['authorization'] = base64_encode($uri['user'] . ':' . (isset($uri['pass']) ? $uri['pass'] : ''));
+        }
+
+        if (isset($uri['port']) === false) {
+            $uri['port'] = $uri['scheme'] === 'https' ? 443 : 80;
+        }
+
+        $uri['path'] = isset($uri['path'])  ? $uri['path'] : '/';
+        $uri['query'] = isset($uri['query']) ? ('?' . $uri['query']) : '';
+
+        return (object) $uri;
     }
 }

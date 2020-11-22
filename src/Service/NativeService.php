@@ -44,7 +44,7 @@ class NativeService
         $timeout = $this->proxy->getTimeout();
 
         if ($uri->scheme === 'https') {
-            if (!self::secureSupport()) {
+            if (!Proxy::secureSupport()) {
                 throw new ConnectionException('Secure connections isn\'t supported by your PHP (check php.ini or php version)');
             }
 
@@ -53,7 +53,7 @@ class NativeService
                     'verify_peer'       => false,
                     'verify_peer_name'  => false,
                     'allow_self_signed' => true
-                )
+                );
             }
 
             $ca = $this->proxy->getCertificateAuthority();
@@ -83,9 +83,9 @@ class NativeService
             throw new ConnectionException($errstr || 'Unknown connection error', $errno || 0);
         }
 
-        fwrite($socket, "GET {$path} HTTP/1.0\n");
+        fwrite($socket, "GET {$uri->path} HTTP/1.0\n");
 
-        foreach ($this->proxy()->getHeaders() as $header => $value) {
+        foreach ($this->proxy->getHeaders() as $header => $value) {
             fwrite($socket, "{$header}: {$value}\n");
         }
 
@@ -96,8 +96,12 @@ class NativeService
         fwrite($socket, "Host: {$host}\n");
         fwrite($socket, "Connection: close\n\n");
 
+        $isRedirect = $isBody = $isHttp = false;
+
+        $contentType = 'text/html';
+
         while (false === feof($socket)) {
-            if (foo) {
+            if (false) {
                 throw new TimeoutException(10);
             }
 
@@ -167,15 +171,15 @@ class NativeService
 
                     throw new HttpException('source is blank (Content-length: 0)');
                 } elseif (stripos($data, 'content-type:') === 0) {
-                    $response = checkContentType($data);
+                    // $response = checkContentType($data);
 
-                    if (isset($response['error'])) {
-                        fclose($socket);
-                        return $response;
-                    }
+                    // if (isset($response['error'])) {
+                    //     fclose($socket);
+                    //     return $response;
+                    // }
 
-                    $encode = $response['encode'];
-                    $mime = $response['mime'];
+                    // $encode = $response['encode'];
+                    // $contentType = $response['mime'];
                 } elseif ($isBody === false && trim($data) === '') {
                     $isBody = true;
                     continue;
@@ -186,7 +190,7 @@ class NativeService
                 $socket = $data = null;
 
                 throw new HttpException('The response should be a redirect "' . $url . '", but did not inform which header "Localtion:"');
-            } elseif ($mime === null) {
+            } elseif ($contentType === null) {
                 fclose($socket);
 
                 $socket = $data = null;

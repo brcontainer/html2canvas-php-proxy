@@ -1,6 +1,6 @@
 <?php
-namespace Inphinit\CrossDomainProxy;
+namespace Inphinit\CrossDomainProxy\Exception;
 
-class ConnectionException extends BaseException
+class ConnectionException extends CoreException
 {
 }

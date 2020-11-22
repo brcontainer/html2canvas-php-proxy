@@ -1,7 +1,7 @@
 <?php
 namespace Inphinit\CrossDomainProxy\Exception;
 
-abstract class BaseException extends \Exception
+class CoreException extends \Exception
 {
     public function __toString()
     {

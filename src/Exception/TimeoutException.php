@@ -1,7 +1,7 @@
 <?php
 namespace Inphinit\CrossDomainProxy\Exception;
 
-class TimeoutException extends BaseException
+class TimeoutException extends CoreException
 {
     public function __construct($timeouted)
     {
