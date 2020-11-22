@@ -1,6 +1,6 @@
 <?php
 /*
- * html2canvas-php-proxy 1.1.2
+ * html2canvas-php-proxy 1.1.3
  *
  * Copyright (c) 2018 Guilherme Nascimento (brcontainer@yahoo.com.br)
  *
@@ -35,7 +35,12 @@ define('H2CP_EOL', chr(10));
 define('H2CP_WOL', chr(13));
 define('H2CP_GMDATECACHE', gmdate('D, d M Y H:i:s'));
 define('H2CP_INIT_EXEC', time());
-define('H2CP_JSONP', empty($_GET['callback']) ? false : $_GET['callback']);
+
+if (empty($_GET['callback'])) {
+    $callback = false;
+} else {
+    $callback = $_GET['callback'];
+}
 
 /*
 If execution has reached the time limit prevents page goes blank (off errors)
@@ -750,13 +755,13 @@ if (empty($_SERVER['HTTP_HOST'])) {
             $err !== null && empty($err['message']) ? '' : (': ' . $err['message'])
         ));
         $err = null;
+    } elseif (H2CP_PREFER_CURL && function_exists('curl_init')) {
+        $response = curlDownloadSource($_GET['url'], $tmp['source']);
     } else {
-        $response = H2CP_PREFER_CURL && function_exists('curl_init') ?
-                        curlDownloadSource($_GET['url'], $tmp['source']) :
-                            downloadSource($_GET['url'], $tmp['source'], 0);
-
-        fclose($tmp['source']);
+        $response = downloadSource($_GET['url'], $tmp['source'], 0);
     }
+
+    if ($tmp) fclose($tmp['source']);
 }
 
 //set mime-type
@@ -794,7 +799,7 @@ if (is_array($response) && false === empty($response['mime'])) {
                 $mime .= ';charset=' . JsonEncodeString($response['encode'], true);
             }
 
-            if (H2CP_JSONP === false) {
+            if ($callback === false) {
                 header('Content-Type: ' . $mime);
                 echo file_get_contents($locationFile);
             } elseif (H2CP_DATAURI) {
@@ -803,13 +808,13 @@ if (is_array($response) && false === empty($response['mime'])) {
                 header('Content-Type: application/javascript');
 
                 if (strpos($mime, 'image/svg') !== 0 && strpos($mime, 'image/') === 0) {
-                    echo H2CP_JSONP, '("data:', $mime, ';base64,',
+                    echo $callback, '("data:', $mime, ';base64,',
                         base64_encode(
                             file_get_contents($locationFile)
                         ),
                     '");';
                 } else {
-                    echo H2CP_JSONP, '("data:', $mime, ',',
+                    echo $callback, '("data:', $mime, ',',
                         asciiToInline(file_get_contents($locationFile)),
                     '");';
                 }
@@ -824,7 +829,7 @@ if (is_array($response) && false === empty($response['mime'])) {
                     $dir_name = '';
                 }
 
-                echo H2CP_JSONP, '(',
+                echo $callback, '(',
                     JsonEncodeString(
                         ($http_port === 443 ? 'https://' : 'http://') .
                         preg_replace('#[:]\\d+$#', '', $_SERVER['HTTP_HOST']) .
@@ -854,10 +859,10 @@ header('Content-Type: application/javascript');
 
 removeOldFiles();
 
-$callback = H2CP_JSONP !== false ? H2CP_JSONP : H2CP_ALTERNATIVE;
+if ($callback === false) {
+    $callback = H2CP_ALTERNATIVE;
+}
 
 echo $callback, '(',
-    JsonEncodeString(
-        'error: html2canvas-proxy-php: ' . $response['error']
-    ),
+    JsonEncodeString('error: html2canvas-proxy-php: ' . $response['error']),
 ');';
