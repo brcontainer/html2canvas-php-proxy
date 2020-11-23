@@ -15,7 +15,7 @@ class Proxy
     private $timeout = 30;
     private $maxRedirs = 5;
     private $certificateAuthority;
-    private $nonSecure = false;
+    private $nonValidate = false;
     private $headers = array();
     private $allowedUrls = array('*');
 
@@ -60,13 +60,13 @@ class Proxy
         return $this->certificateAuthority;
     }
 
-    public function nonSecureAllowed($allow = null)
+    public function withoutSecurityValidation($disable = null)
     {
         if ($allow === null) {
-            return $this->nonSecure;
+            return $this->nonValidate;
         }
 
-        $this->nonSecure = $allow === true;
+        $this->nonValidate = $disable === true;
     }
 
     public function setHeader($header, $value)
@@ -78,14 +78,14 @@ class Proxy
         }
     }
 
-    public function getTemp()
-    {
-        return fopen('php://temp', 'w');
-    }
-
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    public function getTemp()
+    {
+        return fopen('php://temp', 'w');
     }
 
     public function addURLPattern($pattern)
@@ -155,7 +155,7 @@ class Proxy
         $this->service();
     }
 
-    public function jsonp($callback = null)
+    public function jsonp($callback = null, $catchExceptions = true)
     {
         if ($callback === null) {
             $callback = $_GET['callback'];
@@ -165,7 +165,15 @@ class Proxy
             throw new CoreException('Invalid callback');
         }
 
-        $this->service();
+        if ($catchExceptions) {
+            try {
+                $this->service();
+            } catch ($ee) {
+                echo $callback, '(', json_encode($ee->getMessage()), ')';
+            }
+        } else {
+            $this->service();
+        }
     }
 
     public static function parseUri($url)

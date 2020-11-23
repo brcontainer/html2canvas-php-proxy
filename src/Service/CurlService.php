@@ -35,7 +35,7 @@ class CurlService
         curl_setopt($ch, CURLOPT_FILE, $this->temp);
 
         if ($uri->scheme === 'https') {
-            if ($this->proxy->nonSecureAllowed()) {
+            if ($this->proxy->withoutSecurityValidation()) {
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             } else {

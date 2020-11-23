@@ -44,27 +44,25 @@ class NativeService
         $timeout = $this->proxy->getTimeout();
 
         if ($uri->scheme === 'https') {
-            if (!Proxy::secureSupport()) {
-                throw new ConnectionException('Secure connections isn\'t supported by your PHP (check php.ini or php version)');
-            }
-
-            if ($this->proxy->nonSecureAllowed()) {
+            if ($this->proxy->withoutSecurityValidation()) {
                 $ssl = array(
                     'verify_peer'       => false,
                     'verify_peer_name'  => false,
                     'allow_self_signed' => true
                 );
-            }
+            } else if (!Proxy::secureSupport()) {
+                throw new ConnectionException('Secure connections isn\'t supported by your PHP (check php.ini or php version)');
+            } else {
+                $ca = $this->proxy->getCertificateAuthority();
 
-            $ca = $this->proxy->getCertificateAuthority();
-
-            if ($ca) {
-                $ssl = array(
-                    'verify_peer'  => true,
-                    'cafile'       => $ca,
-                    'verify_depth' => 5,
-                    'CN_match'     => $host
-                );
+                if ($ca) {
+                    $ssl = array(
+                        'verify_peer'  => true,
+                        'cafile'       => $ca,
+                        'verify_depth' => 5,
+                        'CN_match'     => $host
+                    );
+                }
             }
 
             $server = 'ssl://' . $host;
@@ -79,8 +77,8 @@ class NativeService
             $socket = stream_socket_client("$server:$port", $errno, $errstr, $timeout, \STREAM_CLIENT_CONNECT, $context);
         }
 
-        if ($errno || $errstr) {
-            throw new ConnectionException($errstr || 'Unknown connection error', $errno || 0);
+        if ($socket === false) {
+            throw new ConnectionException($errstr || 'Unknown connection error', $errno);
         }
 
         fwrite($socket, "GET {$uri->path} HTTP/1.0\n");
@@ -163,7 +161,7 @@ class NativeService
                     //     return array('error' => '"Location:" header redirected for a non-http url (' . $data . ')');
                     // }
 
-                    return download($location, ++$caller);
+                    return $this->download($location, ++$caller);
                 } elseif (preg_match('#^content-length[:](\\s)?0$#i', $data) !== 0) {
                     fclose($socket);
 
