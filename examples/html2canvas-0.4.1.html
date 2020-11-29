@@ -24,7 +24,7 @@
 </head>
 <body>
     <div id="container">
-        <h1>html2canvas 1.x with PHP proxy</h1>
+        <h1>html2canvas 0.4.1 with PHP proxy</h1>
 
         <p>
             From imgur.com: <br>
@@ -45,27 +45,29 @@
 
     <script>
     window.onload = function () {
-        html2canvas(document.getElementById("container"), {
-            "logging": true, //Enable log (use Web Console for get Errors and Warnings)
-            "proxy": "../html2canvasproxy.php",
-            "onrendered": function (canvas) {
-                var img = new Image;
+        setTimeout(() => {
+            html2canvas(document.getElementById("container"), {
+                "logging": true, //Enable log (use Web Console for get Errors and Warnings)
+                "proxy": "../html2canvasproxy.php",
+                "onrendered": function (canvas) {
+                    var img = new Image;
 
-                img.onload = function () {
-                    img.onload = null;
+                    img.onload = function () {
+                        img.onload = null;
 
-                    document.getElementById("output").appendChild(img);
-                };
+                        document.getElementById("output").appendChild(img);
+                    };
 
-                img.onerror = function () {
-                    img.onerror = null;
+                    img.onerror = function () {
+                        img.onerror = null;
 
-                    console.log("Not loaded image from canvas.toDataURL");
-                };
+                        console.log("Not loaded image from canvas.toDataURL");
+                    };
 
-                img.src = canvas.toDataURL("image/png");
-            }
-        });
+                    img.src = canvas.toDataURL("image/png");
+                }
+            });
+        }, 5000);
     };
     </script>
 </body>
