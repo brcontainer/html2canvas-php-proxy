@@ -23,6 +23,10 @@ class Proxy
 
     public function __construct($url, $timeout = null)
     {
+        if (!self::isHttpScheme($url)) {
+            throw new CoreException("Invalid URL: \"{$url}\"");
+        }
+
         $this->url = $url;
 
         if ($timeout) {
@@ -73,7 +77,7 @@ class Proxy
     {
         $header = strtolower($header);
 
-        if ($header === 'host' || $header === 'connection') {
+        if ($header !== 'host' && $header !== 'connection') {
             $this->headers[$header] = trim($value);
         }
     }
@@ -175,8 +179,8 @@ class Proxy
             $this->service();
         }
     }
-
     public static function parseUri($url)
+
     {
         $uri = parse_url($url);
 
@@ -192,5 +196,10 @@ class Proxy
         $uri['query'] = isset($uri['query']) ? ('?' . $uri['query']) : '';
 
         return (object) $uri;
+    }
+
+    public static function isHttpScheme($url)
+    {
+        return $url && in_array(strtolower(parse_url($url, PHP_URL_SCHEME)), array( 'http', 'https' ));
     }
 }

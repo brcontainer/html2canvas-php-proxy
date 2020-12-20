@@ -1,3 +1,9 @@
+# php
+~*
+.phpintel
+composer.lock
+
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

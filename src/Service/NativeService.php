@@ -96,7 +96,7 @@ class NativeService
 
         $isRedirect = $isBody = $isHttp = false;
 
-        $contentType = 'text/html';
+        $contentType = null;
 
         while (false === feof($socket)) {
             if (false) {
@@ -149,17 +149,15 @@ class NativeService
                         throw new HttpException('"Location:" header is blank');
                     }
 
-                    // $nextUri = $data;
-                    // $data = relativeToAbsolute($url, $data);
+                    $location = self::getAbsoluteURL($url, $location);
 
-                    // if ($data === '') {
-                    //     return array('error' => 'Invalid scheme in url (' . $nextUri . ')');
-                    //     throw new HttpException('"Location:" header is blank');
-                    // }
+                    if ($url === $location) {
+                        throw new HttpException('"Location:" header is in a loop always directing to the same URL');
+                    }
 
-                    // if (isHttpUrl($data) === false) {
-                    //     return array('error' => '"Location:" header redirected for a non-http url (' . $data . ')');
-                    // }
+                    if (Proxy::isHttpScheme($data) === false) {
+                        return array('error' => '"Location:" header redirected for a non-http url (' . $data . ')');
+                    }
 
                     return $this->download($location, ++$caller);
                 } elseif (preg_match('#^content-length[:](\\s)?0$#i', $data) !== 0) {
@@ -169,15 +167,8 @@ class NativeService
 
                     throw new HttpException('source is blank (Content-length: 0)');
                 } elseif (stripos($data, 'content-type:') === 0) {
-                    // $response = checkContentType($data);
-
-                    // if (isset($response['error'])) {
-                    //     fclose($socket);
-                    //     return $response;
-                    // }
-
-                    // $encode = $response['encode'];
-                    // $contentType = $response['mime'];
+                    $contentType = trim(substr($data, 13));
+                    continue;
                 } elseif ($isBody === false && trim($data) === '') {
                     $isBody = true;
                     continue;
@@ -200,5 +191,9 @@ class NativeService
                 continue;
             }
         }
+    }
+
+    private static function getAbsoluteURL($url, $location)
+    {
     }
 }
