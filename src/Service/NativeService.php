@@ -156,7 +156,7 @@ class NativeService
                     }
 
                     if (Proxy::isHttpScheme($data) === false) {
-                        return array('error' => '"Location:" header redirected for a non-http url (' . $data . ')');
+                        throw new Exception("\"Location:\" header redirected for a non-http url ({$data})");
                     }
 
                     return $this->download($location, ++$caller);
@@ -178,13 +178,13 @@ class NativeService
 
                 $socket = $data = null;
 
-                throw new HttpException('The response should be a redirect "' . $url . '", but did not inform which header "Localtion:"');
+                throw new HttpException("The response should be a redirect \"{$url}\", but did not inform which header \"Localtion:\"");
             } elseif ($contentType === null) {
                 fclose($socket);
 
                 $socket = $data = null;
 
-                throw new HttpException('Not set the mimetype from "' . $url . '"');
+                throw new HttpException("Not set the mimetype from \"{$url}\"");
             } else {
                 fwrite($this->temp, $data);
 
